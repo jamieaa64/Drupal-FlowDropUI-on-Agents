@@ -73,4 +73,39 @@ class ValidationException extends \RuntimeException {
     return implode("\n", $messages);
   }
 
+  /**
+   * Creates a ValidationException from constraint violations.
+   *
+   * @param \Symfony\Component\Validator\ConstraintViolationListInterface $violations
+   *   The constraint violations.
+   *
+   * @return static
+   *   The exception instance.
+   */
+  public static function fromViolations(ConstraintViolationListInterface $violations): static {
+    $messages = [];
+    foreach ($violations as $violation) {
+      $path = $violation->getPropertyPath();
+      $message = $violation->getMessage();
+      $messages[] = $path ? "$path: $message" : $message;
+    }
+
+    $formattedMessage = 'Validation failed: ' . implode('; ', $messages);
+    return new static($formattedMessage, $violations);
+  }
+
+  /**
+   * Creates a ValidationException from error message strings.
+   *
+   * @param array $messages
+   *   Array of error message strings.
+   *
+   * @return static
+   *   The exception instance.
+   */
+  public static function fromMessages(array $messages): static {
+    $formattedMessage = 'Validation failed: ' . implode('; ', $messages);
+    return new static($formattedMessage);
+  }
+
 }

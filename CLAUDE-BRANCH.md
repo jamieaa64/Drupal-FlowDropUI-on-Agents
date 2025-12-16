@@ -5,9 +5,10 @@
 **IMPORTANT FOR FUTURE AGENTS**: This file documents the current branch's purpose, progress, and implementation plans.
 
 - **DO NOT REMOVE THIS SECTION** - it helps orient future agents to the branch context
-- **Current Branch**: `feature/flowdrop-agent-integration`
-- **Branch Goal**: Make FlowDrop UI save directly to AI Agent/Assistant/Tool configs
+- **Current Branch**: `feature/flowdrop-phase2-implementation`
+- **Branch Goal**: Phase 2 - Implement FlowDrop to AI Agent config mapping services
 - **Update the branch name above** when working on a different branch
+- **Previous Branch**: `feature/flowdrop-agent-integration` (Phase 1 research - merged to main)
 
 ---
 
@@ -58,7 +59,7 @@ Canvas = 1 Assistant
 
 ---
 
-## Current Phase: Phase 1 - Foundation
+## Current Phase: Phase 2 - Service Implementation ✅ COMPLETE
 
 ### Phase 1 Objectives
 1. **Study Modeler API integration pattern** - Understand how it works
@@ -400,6 +401,8 @@ Configured in `~/.ddev/global_config.yaml`
 1. **Simple Agent Mode**: FlowDrop nodes map directly to AI Agent tools
 2. **Multi-Agent Mode**: FlowDrop graph maps to multiple AI Agent entities + orchestration
 
+USER RESPONSE: I don't see why there needs to be a simple agent mode. An Agent node will map onto a single Agent configuration, if a flow has more than one agent its because the Agent has tools that are other agents (but those will be saved on that Agent node and the configuration of the first agent pointing to it) - For now we can aim to always start with an Assistant or "Orchestration Agent"
+
 **Service Interface**:
 ```php
 interface FlowDropAgentMapperInterface {
@@ -466,10 +469,90 @@ third_party_settings:
 
 1. **Tool ID Format**: Should we use the `ai_agent:` prefix format (like `ai_agent:http_request`) or the `tool:` prefix format? Need to verify which format the AI Agents module expects.
 
+USER RESPONSE: DOn't know, we are aiming to support doing things the "proper" way according to the tool api
+
 2. **Provider/Model Selection**: The AI Agents module doesn't store provider/model directly on agents. How should FlowDrop UI handle model selection? Options:
    - Use global default from AI module settings
    - Store in third-party settings on agent
    - Add to a separate "AI Settings" entity
+
+   USER RESPONSE: IT should only ever save to the settings that already exist within the configruation entities and should make use of whatever is there.
+
+   IT looks like the Assistant has provider settings
+
+---
+
+## Phase 2 Implementation Summary
+
+### Services Implemented
+
+**1. FlowDropAgentMapper** (`src/Services/FlowDropAgentMapper.php`)
+- Bidirectional conversion between FlowDrop workflows and AI Agent configs
+- Key methods:
+  - `workflowToAgentConfigs()` - Convert workflow to agent configs (Save)
+  - `agentConfigsToWorkflow()` - Convert agents back to workflow (Load)
+  - `storePositions()` / `loadPositions()` - UI metadata via third-party settings
+  - `validateWorkflowMapping()` - Validate before save
+- Handles multi-agent workflows with orchestration detection
+- Stores UI positions in agent's third-party settings
+
+**2. AgentRepository** (`src/Services/AgentRepository.php`)
+- CRUD operations for AI Agent entities
+- Key methods:
+  - `build()` - Create/update agent from data array
+  - `buildMultiple()` - Batch create from workflow conversion
+  - `validate()` - Validate data without saving
+  - `getFlowDropAgents()` - Get agents created by FlowDrop
+- Tracks FlowDrop-created agents via third-party settings
+
+**3. ToolDataProvider** (`src/Services/ToolDataProvider.php`)
+- Provides tool information for FlowDrop UI drawer
+- Key methods:
+  - `getAvailableTools()` - List all tools (33 tools available)
+  - `getToolsByCategory()` - Grouped for UI display
+  - `getAvailableAgents()` - List agents that can be used as sub-agents
+  - `getAgentSchema()` - JSON Schema for agent config
+
+### Services Configuration
+
+Updated `flowdrop_ai_provider.services.yml`:
+```yaml
+services:
+  flowdrop_ai_provider.agent_mapper:
+    class: Drupal\flowdrop_ai_provider\Services\FlowDropAgentMapper
+    arguments: ['@entity_type.manager', '@typed_data_manager', '@serializer']
+
+  flowdrop_ai_provider.agent_repository:
+    class: Drupal\flowdrop_ai_provider\Services\AgentRepository
+    arguments: ['@entity_type.manager', '@typed_data_manager']
+
+  flowdrop_ai_provider.tool_data_provider:
+    class: Drupal\flowdrop_ai_provider\Services\ToolDataProvider
+    arguments: ['@plugin.manager.tool', '@entity_type.manager']
+```
+
+### Module Dependencies Updated
+
+Added to `flowdrop_ai_provider.info.yml`:
+- `flowdrop:flowdrop_workflow` - For WorkflowDTO classes
+- `tool:tool` - For ToolManager service
+
+### Testing Results
+
+All services verified working:
+- ToolDataProvider: 33 tools available
+- AgentRepository: 5 existing agents loaded
+- FlowDropAgentMapper: Successfully converts workflow ↔ agent configs
+
+---
+
+## Next Phase: Phase 3 - API Integration
+
+### Phase 3 Objectives
+1. Create API endpoints for FlowDrop UI to call these services
+2. Modify FlowDrop UI save/load to use new services
+3. Add proper error handling and user feedback
+4. Create integration tests
 
 ---
 
@@ -478,3 +561,4 @@ third_party_settings:
 
 1. Initial branch creation from main
 2. Phase 1 research complete - Added schema definitions and service interfaces
+3. Phase 2 complete - Implemented FlowDropAgentMapper, AgentRepository, and ToolDataProvider services
