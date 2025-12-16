@@ -54,3 +54,4 @@ web/maintenance.html
 
 # Local drush files.
 drush/drush.yml
+.DS_Store
