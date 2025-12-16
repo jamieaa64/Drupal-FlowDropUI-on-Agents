@@ -1,0 +1,6 @@
+id: processing
+label: 'Processing'
+description: 'Node types that process and transform data'
+icon: 'mdi:cog'
+color: '#2196F3'
+enabled: true 

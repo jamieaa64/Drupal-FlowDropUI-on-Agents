@@ -1,0 +1,6 @@
+id: agent
+label: 'Agent'
+description: 'Node types for AI agents and autonomous systems'
+icon: 'mdi:account-cog'
+color: '#06b6d4'
+enabled: true 

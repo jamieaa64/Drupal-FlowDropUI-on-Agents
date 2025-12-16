@@ -1,0 +1,12 @@
+administer flowdrop_pipeline types:
+  title: 'Administer flowdrop pipeline types'
+  description: 'Maintain the types of flowdrop pipeline entity.'
+  restrict access: true
+view flowdrop_pipeline:
+  title: 'View flowdrop pipeline'
+edit flowdrop_pipeline:
+  title: 'Edit flowdrop pipeline'
+delete flowdrop_pipeline:
+  title: 'Delete flowdrop pipeline'
+create flowdrop_pipeline:
+  title: 'Create flowdrop pipeline'

@@ -1,0 +1,5 @@
+entity.flowdrop_node_type.overview:
+  title: FlowDrop Node Types
+  parent: system.admin_structure
+  description: 'List of flowdrop node types to extend site functionality.'
+  route_name: entity.flowdrop_node_type.collection

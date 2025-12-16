@@ -1,0 +1,15 @@
+services:
+  mkdocs:
+    container_name: ddev-${DDEV_SITENAME}-mkdocs
+    image: squidfunk/mkdocs-material
+    ports:
+      - 8000
+    volumes:
+      - "../:/docs"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
+    environment:
+      - VIRTUAL_HOST=$DDEV_HOSTNAME
+      - HTTP_EXPOSE=8001:8000
+      - HTTPS_EXPOSE=8002:8000

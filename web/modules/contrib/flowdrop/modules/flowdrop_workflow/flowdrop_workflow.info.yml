@@ -1,0 +1,11 @@
+name: 'FlowDrop Workflow'
+type: module
+description: 'Provides workflow entity type for storing and managing workflow definitions.'
+package: 'FlowDrop'
+core_version_requirement: ^11
+
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_type
+  - flowdrop:flowdrop_node_category
+  - flowdrop:flowdrop_ui

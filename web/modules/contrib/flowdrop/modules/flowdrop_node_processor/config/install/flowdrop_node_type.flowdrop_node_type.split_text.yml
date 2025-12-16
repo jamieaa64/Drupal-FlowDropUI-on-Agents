@@ -1,0 +1,18 @@
+id: split_text
+label: 'Split Text'
+description: 'Split text into chunks for processing'
+category: processing
+icon: 'mdi:content-cut'
+color: '#f59e0b'
+version: '1.0.0'
+enabled: true
+config:
+  chunkSize: 1000
+  chunkOverlap: 200
+  separator: '\\n'
+tags:
+  - processing
+  - text
+  - split
+  - chunking
+executor_plugin: 'split_text'

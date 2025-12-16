@@ -1,0 +1,6 @@
+id: embedding
+label: 'Embedding'
+description: 'Node types for text embedding and vector operations'
+icon: 'mdi:vector-point'
+color: '#8b5cf6'
+enabled: true 

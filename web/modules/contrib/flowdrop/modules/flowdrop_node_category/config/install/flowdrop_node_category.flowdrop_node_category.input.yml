@@ -1,0 +1,6 @@
+id: input
+label: 'Input'
+description: 'Node types that provide input data to workflows'
+icon: 'mdi:input'
+color: '#4CAF50'
+enabled: true 

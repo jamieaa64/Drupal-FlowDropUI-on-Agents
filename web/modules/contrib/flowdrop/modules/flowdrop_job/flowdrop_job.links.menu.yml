@@ -1,0 +1,11 @@
+entity.flowdrop_job_type.collection:
+  title: 'FlowDrop Job types'
+  description: 'Manage and CRUD actions on FlowDrop Job type.'
+  parent: system.admin_structure
+  route_name: entity.flowdrop_job_type.collection
+
+entity.flowdrop_job.collection:
+  title: 'FlowDrop Jobs'
+  description: 'List of flowdrop jobs.'
+  route_name: entity.flowdrop_job.collection
+  parent: system.admin_content

@@ -1,0 +1,9 @@
+name: 'FlowDrop Node Test'
+type: module
+description: 'Test module for FlowDrop Node'
+core_version_requirement: ^11
+package: 'FlowDrop'
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_category
+  - flowdrop:flowdrop_node_type

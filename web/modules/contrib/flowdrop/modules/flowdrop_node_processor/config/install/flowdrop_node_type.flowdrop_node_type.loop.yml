@@ -1,0 +1,16 @@
+id: loop
+label: 'Loop'
+description: 'Iterate over data items'
+category: logic
+icon: 'mdi:loop'
+color: '#8b5cf6'
+version: '1.0.0'
+enabled: true
+config:
+  maxIterations: 100
+tags:
+  - conditional
+  - logic
+  - loop
+  - iteration
+executor_plugin: 'loop_executor'

@@ -1,0 +1,17 @@
+vendor
+node_modules
+.DS_Store
+.idea
+.vscode
+.env
+.env.local
+.env.development.local
+.env.test.local
+
+# Ignore local development environment files.
+recipes/
+web/
+.playwright-mcp
+
+symlink_project.php
+composer.contrib.json

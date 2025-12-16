@@ -1,0 +1,10 @@
+name: 'FlowDrop AI Provider'
+type: module
+description: 'FlowDrop Integration with Drupal AI'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - ai:ai
+  - ai_agents:ai_agents
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_type

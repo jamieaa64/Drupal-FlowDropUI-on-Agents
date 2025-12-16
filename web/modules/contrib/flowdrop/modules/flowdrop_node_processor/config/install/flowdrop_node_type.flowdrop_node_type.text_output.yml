@@ -1,0 +1,17 @@
+id: text_output
+label: 'Text Output'
+description: 'Simple text output for displaying data'
+category: output
+icon: 'mdi:text-box'
+color: '#ef4444'
+version: '1.0.0'
+enabled: true
+config:
+  format: 'plain'
+  maxLength: 1000
+  showTimestamp: false
+tags:
+  - output
+  - text
+  - display
+executor_plugin: 'text_output'

@@ -1,0 +1,7 @@
+name: Tool Explorer
+type: module
+description: 'Provides a user interface for exploring and executing tools.'
+package: Tool
+core_version_requirement: ^11
+dependencies:
+  - tool:tool

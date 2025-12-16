@@ -1,0 +1,19 @@
+id: conditional
+label: 'Conditional'
+description: 'Conditional logic and branching in workflows'
+category: logic
+icon: 'mdi:gate'
+color: '#f59e0b'
+version: '1.0.0'
+enabled: true
+config:
+  condition: ''
+  operator: 'equals'
+  value: ''
+  fallback: false
+tags:
+  - logic
+  - conditional
+  - branching
+  - control
+executor_plugin: 'conditional'

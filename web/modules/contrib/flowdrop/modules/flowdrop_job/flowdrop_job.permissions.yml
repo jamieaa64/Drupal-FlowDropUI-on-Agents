@@ -1,0 +1,12 @@
+administer flowdrop_job types:
+  title: 'Administer flowdrop job types'
+  description: 'Maintain the types of flowdrop job entity.'
+  restrict access: true
+view flowdrop_job:
+  title: 'View flowdrop job'
+edit flowdrop_job:
+  title: 'Edit flowdrop job'
+delete flowdrop_job:
+  title: 'Delete flowdrop job'
+create flowdrop_job:
+  title: 'Create flowdrop job'

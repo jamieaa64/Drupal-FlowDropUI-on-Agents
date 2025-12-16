@@ -1,0 +1,24 @@
+services:
+  flowdrop_modeler.bpmn_to_workflow_mapper:
+    class: Drupal\flowdrop_modeler\Service\BpmnToWorkflowMapper
+
+  flowdrop_modeler.workflow_layout_service:
+    class: Drupal\flowdrop_modeler\Service\WorkflowLayoutService
+
+  flowdrop_modeler.workflow_data_transformer:
+    class: Drupal\flowdrop_modeler\Service\WorkflowDataTransformer
+
+  flowdrop_modeler.available_node_types:
+    class: Drupal\flowdrop_modeler\Service\AvailableNodeTypesService
+    arguments:
+      - '@logger.factory'
+
+
+  flowdrop_modeler.workflow_orchestrator:
+    class: Drupal\flowdrop_modeler\Service\WorkflowOrchestratorService
+    arguments:
+      - '@flowdrop_modeler.bpmn_to_workflow_mapper'
+      - '@flowdrop_modeler.workflow_layout_service'
+      - '@flowdrop_modeler.workflow_data_transformer'
+      - '@flowdrop_modeler.available_node_types'
+      - '@logger.factory'

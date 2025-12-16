@@ -185,32 +185,65 @@ flowdrop_ai_provider/src/Schema/
 
 ---
 
-## Reference: AI Agent Config Structure
+## Reference: AI Agent Config Structure (ACTUAL)
 
-From studying `web/modules/contrib/ai_agents/`:
+From studying `web/modules/contrib/ai_agents/src/Entity/AiAgent.php`:
 
 ```php
-// Agent config entity fields (approximate)
+// AI Agent Config Entity - Actual Structure
 $agent = [
-  'id' => 'my_agent',
-  'label' => 'My Agent',
-  'description' => 'Agent description',
-  'plugin' => 'agent_plugin_id',
-  'provider' => 'openai',
-  'model' => 'gpt-4',
-  'settings' => [
-    'temperature' => 0.7,
-    'max_tokens' => 1000,
-  ],
-  'prompts' => [
-    'system' => 'You are a helpful assistant...',
-  ],
+  'id' => 'my_agent',                    // Machine name (required)
+  'label' => 'My Agent',                 // Display name (required)
+  'description' => 'Used by triage agents to select this agent', // (required)
+  'system_prompt' => 'You are a helpful assistant...',  // (required)
+  'secured_system_prompt' => '[ai_agent:agent_instructions]', // Full prompt with tokens
+
+  // Tools as map of boolean values
   'tools' => [
-    'tool:http_request',
-    'tool:calculator',
+    'ai_agent:get_content_type_info' => TRUE,
+    'ai_agent:edit_content_type' => TRUE,
   ],
+
+  // Per-tool settings
+  'tool_settings' => [
+    'ai_agent:get_content_type_info' => [
+      'return_directly' => 0,
+      'description_override' => '',
+      'require_usage' => FALSE,
+      'use_artifacts' => FALSE,
+    ],
+  ],
+
+  // Property-level restrictions per tool
+  'tool_usage_limits' => [
+    'ai_agent:get_content_type_info' => [
+      'node_type' => [
+        'action' => '',  // '', 'only_allow', or 'force_value'
+        'hide_property' => 0,
+        'values' => '',  // Newline-separated values
+      ],
+    ],
+  ],
+
+  // YAML string of context tools run before agent starts
+  'default_information_tools' => "node_types:\n  label: 'Node Types'\n  tool: 'ai_agent:list_config_entities'",
+
+  // Agent type flags
+  'orchestration_agent' => FALSE,  // Only picks other agents
+  'triage_agent' => FALSE,         // Picks agents AND does own work
+
+  // Execution settings
+  'max_loops' => 3,
+  'masquerade_roles' => [],
+  'exclude_users_role' => FALSE,
+
+  // Structured output
+  'structured_output_enabled' => FALSE,
+  'structured_output_schema' => '',
 ];
 ```
+
+**Key Insight**: AI Agents module does NOT store provider/model settings directly on the agent. Those are handled by the AI module's provider system.
 
 ---
 
@@ -312,19 +345,131 @@ Configured in `~/.ddev/global_config.yaml`
 ## Progress Tracking
 
 ### Phase 1 Checklist
-- [ ] Task 1.1: Study Modeler API integration pattern
-- [ ] Task 1.2: Study ECA Integration implementation in depth
-- [ ] Task 1.3: Map FlowDrop's current save/load mechanism
-- [ ] Task 1.4: Design ConfigMapper service interface
-- [ ] Task 1.5: Create schema definitions for Assistant/Agent
+- [x] Task 1.1: Study Modeler API integration pattern
+- [x] Task 1.2: Study ECA Integration implementation in depth
+- [x] Task 1.3: Map FlowDrop's current save/load mechanism
+- [x] Task 1.4: Design ConfigMapper service interface
+- [x] Task 1.5: Create schema definitions for Assistant/Agent
 
 ### Notes/Findings
-*(Add notes here as you discover things)*
+
+#### Modeler API Pattern (Task 1.1)
+- **Plugin-based bridge pattern** connecting UI/visual modelers with backend systems
+- Model owners and modelers are completely decoupled through plugin interfaces
+- Key classes:
+  - `ModelOwnerInterface` - Owns config entities (ECA, AI Agents)
+  - `ModelerInterface` - UI providers (BPMN.io)
+  - `Api.php` - Central orchestrator
+- Storage options: THIRD_PARTY (default), SEPARATE, or NONE
+- Uses `prepareModelFromData()` to validate and transform UI data → config entities
+- Dynamic route generation for each owner+modeler combination
+
+#### ECA Integration Pattern (Task 1.2)
+- Complete reference implementation in `ai_integration_eca/modules/agents/`
+- **Data Flow**: UI Data → ModelMapper → TypedData → Validation → EcaRepository → ECA Entity
+- Key components:
+  - `TypedData/EcaModelDefinition.php` - Schema definition using ComplexDataDefinitionBase
+  - `Services/ModelMapper.php` - Bidirectional conversion (Payload ↔ TypedData ↔ Entity)
+  - `Services/EcaRepository.php` - Entity creation/update with validation
+  - `Services/DataProvider.php` - Aggregates available components for UI
+  - Custom validation constraints (SuccessorsAreValidConstraint)
+- Multi-layer validation: JSON → TypedData Schema → Plugin validation → Entity validation
+
+#### FlowDrop Save/Load (Task 1.3)
+- **Frontend**: `@d34dman/flowdrop` npm package (Svelte-based)
+- **Save Flow**:
+  1. User clicks Save → `window.flowdropSave()` called
+  2. PUT `/api/flowdrop/workflows/{id}` with JSON body
+  3. `WorkflowsController::updateWorkflow()` validates and saves to `flowdrop_workflow` entity
+- **Data Structures**:
+  - `FlowDropWorkflow` config entity with: id, label, description, nodes[], edges[], metadata
+  - `WorkflowDTO`, `WorkflowNodeDTO`, `WorkflowEdgeDTO` for data transfer
+- **Node Structure**: id, typeId (plugin), label, config, metadata, position{x,y}, inputs[], outputs[]
+- **Edge Structure**: id, source, target, sourceHandle, targetHandle, isTrigger, branchName
+
+#### AI Agent Config Structure (Task 1.3)
+- Entity: `ai_agents.ai_agent.*`
+- **NO provider/model settings** on agent - handled by AI module provider system
+- Tools stored as map: `'tool_id' => TRUE`
+- Tool settings per-tool: return_directly, description_override, use_artifacts
+- Tool usage limits: property-level restrictions (allow/force values)
+- Agent types: orchestration_agent (only picks), triage_agent (picks AND works), worker (neither)
+
+#### ConfigMapper Design (Task 1.4)
+**Key Insight**: We need TWO mapping approaches:
+1. **Simple Agent Mode**: FlowDrop nodes map directly to AI Agent tools
+2. **Multi-Agent Mode**: FlowDrop graph maps to multiple AI Agent entities + orchestration
+
+**Service Interface**:
+```php
+interface FlowDropAgentMapperInterface {
+  // FlowDrop → AI Agent (Save)
+  public function workflowToAgentConfigs(WorkflowDTO $workflow): array;
+  public function nodeToAgentConfig(WorkflowNodeDTO $node, array $connectedTools): AiAgentConfig;
+  public function extractToolsFromWorkflow(WorkflowDTO $workflow, string $agentNodeId): array;
+
+  // AI Agent → FlowDrop (Load)
+  public function agentConfigsToWorkflow(array $agentIds): WorkflowDTO;
+  public function agentConfigToNode(AiAgentConfig $agent): WorkflowNodeDTO;
+  public function toolsToToolNodes(array $tools, string $parentAgentNodeId): array;
+
+  // UI Metadata
+  public function storePositions(string $agentId, array $positions): void;
+  public function loadPositions(string $agentId): array;
+}
+```
+
+**Mapping Logic**:
+- FlowDrop `chat_model` node → AI Agent entity
+- FlowDrop tool nodes attached to agent → Agent's `tools` array
+- FlowDrop edges between agents → Orchestration/triage relationship
+- Node positions → Third-party settings on agent config
+
+**UI Position Storage**: Store in agent's third-party settings:
+```yaml
+third_party_settings:
+  flowdrop_ai_provider:
+    positions:
+      agent_node: {x: 100, y: 100}
+      tool_1: {x: 150, y: 200}
+```
+
+#### Schema Definitions Created (Task 1.5)
+
+**Files created in `flowdrop_ai_provider/src/`:**
+
+1. **TypedData/FlowDropAgentModelDefinition.php** - ComplexDataDefinitionBase for agent models
+   - Properties: model_id, label, description, system_prompt, agents, tools, edges, orchestration_agent, triage_agent, max_loops, ui_metadata
+
+2. **TypedData/FlowDropAgentModel.php** - TypedData container (#[DataType] plugin)
+   - Helper methods: getName(), getModelId(), getSystemPrompt(), getAgents(), getTools(), etc.
+
+3. **Services/FlowDropAgentMapperInterface.php** - Main mapping service interface
+   - Save methods: workflowToModel(), workflowToAgentConfigs(), nodeToAgentConfig()
+   - Load methods: agentConfigsToWorkflow(), agentConfigToNode(), toolsToToolNodes()
+   - Position methods: storePositions(), loadPositions()
+   - Validation: validateWorkflowMapping(), fromPayload(), fromEntity()
+
+4. **Services/AgentRepositoryInterface.php** - Agent entity CRUD interface
+   - Methods: build(), buildMultiple(), load(), loadMultiple(), getAll(), delete(), validate()
+
+5. **Services/ToolDataProviderInterface.php** - Tool data for UI drawer
+   - Methods: getAvailableTools(), getToolsByCategory(), getTool(), getToolConfigSchema()
+
+6. **Exception/MappingException.php** - Workflow mapping errors
+7. **Exception/ValidationException.php** - Data validation errors with violation support
 
 ---
 
 ## Questions for User
 *(Add questions here if you get stuck)*
+
+1. **Tool ID Format**: Should we use the `ai_agent:` prefix format (like `ai_agent:http_request`) or the `tool:` prefix format? Need to verify which format the AI Agents module expects.
+
+2. **Provider/Model Selection**: The AI Agents module doesn't store provider/model directly on agents. How should FlowDrop UI handle model selection? Options:
+   - Use global default from AI module settings
+   - Store in third-party settings on agent
+   - Add to a separate "AI Settings" entity
 
 ---
 
@@ -332,3 +477,4 @@ Configured in `~/.ddev/global_config.yaml`
 *(Track commits as you make them)*
 
 1. Initial branch creation from main
+2. Phase 1 research complete - Added schema definitions and service interfaces

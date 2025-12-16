@@ -1,0 +1,4 @@
+services:
+  flowdrop_ui.endpoint_config:
+    class: Drupal\flowdrop_ui\Service\FlowDropEndpointConfigService
+    arguments: ['@language_manager']

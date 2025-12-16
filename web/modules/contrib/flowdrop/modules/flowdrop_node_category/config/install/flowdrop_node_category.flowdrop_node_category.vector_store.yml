@@ -1,0 +1,6 @@
+id: vector_store
+label: 'Vector Store'
+description: 'Node types for vector database operations and similarity search'
+icon: 'mdi:database-search'
+color: '#84cc16'
+enabled: true 

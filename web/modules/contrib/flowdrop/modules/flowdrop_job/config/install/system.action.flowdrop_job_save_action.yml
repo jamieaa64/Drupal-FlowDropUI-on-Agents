@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - flowdrop_job
+id: flowdrop_job_save_action
+label: 'Save flowdrop jobs'
+type: flowdrop_job
+plugin: entity:save_action:flowdrop_job
+configuration: {  }

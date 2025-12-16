@@ -1,0 +1,17 @@
+id: structured_output
+label: 'Structured Output'
+description: 'Generate structured output from models'
+category: prompt
+icon: 'mdi:table'
+color: '#6366f1'
+version: '1.0.0'
+enabled: true
+config:
+  schema: []
+  outputType: 'json'
+tags:
+  - prompt
+  - structured
+  - output
+  - schema
+executor_plugin: 'structured_output'

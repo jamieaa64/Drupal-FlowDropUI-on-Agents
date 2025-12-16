@@ -1,0 +1,72 @@
+# FlowDrop Runtime Routes
+
+# Pipeline Interaction Form
+flowdrop_runtime.pipeline_interaction:
+  path: '/admin/structure/flowdrop-runtime/pipeline-interaction'
+  defaults:
+    _form: '\Drupal\flowdrop_runtime\Form\PipelineInteractionForm'
+    _title: 'Pipeline Interaction'
+  requirements:
+    _permission: 'administer flowdrop runtime'
+
+# FlowDrop Runtime REST API Routes
+
+# Get execution status
+flowdrop_runtime.api.status:
+  path: '/api/flowdrop-runtime/status/{executionId}'
+  defaults:
+    _controller: '\Drupal\flowdrop_runtime\Controller\Api\StatusController::getExecutionStatus'
+    _title: 'FlowDrop Runtime Status'
+  requirements:
+    _permission: 'access flowdrop runtime api'
+    executionId: '[a-zA-Z0-9_-]+'
+  options:
+    parameters:
+      executionId:
+        type: string
+
+# Get node statuses for an execution
+flowdrop_runtime.api.status.nodes:
+  path: '/api/flowdrop-runtime/status/{executionId}/nodes'
+  defaults:
+    _controller: '\Drupal\flowdrop_runtime\Controller\Api\StatusController::getNodeStatuses'
+    _title: 'FlowDrop Runtime Node Statuses'
+  requirements:
+    _permission: 'access flowdrop runtime api'
+    executionId: '[a-zA-Z0-9_-]+'
+  options:
+    parameters:
+      executionId:
+        type: string
+
+# Get detailed execution information
+flowdrop_runtime.api.status.details:
+  path: '/api/flowdrop-runtime/status/{executionId}/details'
+  defaults:
+    _controller: '\Drupal\flowdrop_runtime\Controller\Api\StatusController::getExecutionDetails'
+    _title: 'FlowDrop Runtime Execution Details'
+  requirements:
+    _permission: 'access flowdrop runtime api'
+    executionId: '[a-zA-Z0-9_-]+'
+  options:
+    parameters:
+      executionId:
+        type: string
+
+# Health check endpoint
+flowdrop_runtime.api.health:
+  path: '/api/flowdrop-runtime/health'
+  defaults:
+    _controller: '\Drupal\flowdrop_runtime\Controller\Api\StatusController::getHealth'
+    _title: 'FlowDrop Runtime Health Check'
+  requirements:
+    _permission: 'administer flowdrop'
+
+# System metrics endpoint
+flowdrop_runtime.api.metrics:
+  path: '/api/flowdrop-runtime/metrics'
+  defaults:
+    _controller: '\Drupal\flowdrop_runtime\Controller\Api\StatusController::getSystemMetrics'
+    _title: 'FlowDrop Runtime System Metrics'
+  requirements:
+    _permission: 'access flowdrop runtime api'

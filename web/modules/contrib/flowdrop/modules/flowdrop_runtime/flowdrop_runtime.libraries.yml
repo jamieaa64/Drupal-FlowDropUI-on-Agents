@@ -1,0 +1,11 @@
+# FlowDrop Runtime JavaScript Libraries
+
+# Pipeline monitoring with auto-refresh functionality
+pipeline-monitor:
+  version: 1.x
+  js:
+    js/pipeline-monitor.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings

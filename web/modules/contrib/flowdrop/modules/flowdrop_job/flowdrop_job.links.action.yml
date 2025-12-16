@@ -1,0 +1,11 @@
+flowdrop_job.type_add:
+  title: 'Add flowdrop job type'
+  route_name: entity.flowdrop_job_type.add_form
+  appears_on:
+    - entity.flowdrop_job_type.collection
+
+flowdrop_job.add_page:
+  title: 'Add flowdrop job'
+  route_name: entity.flowdrop_job.add_page
+  appears_on:
+    - entity.flowdrop_job.collection

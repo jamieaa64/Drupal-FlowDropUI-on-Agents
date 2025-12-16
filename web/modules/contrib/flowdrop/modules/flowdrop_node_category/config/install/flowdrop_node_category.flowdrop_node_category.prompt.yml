@@ -1,0 +1,6 @@
+id: prompt
+label: 'Prompt'
+description: 'Node types for prompt engineering and template management'
+icon: 'mdi:format-quote-close'
+color: '#f59e0b'
+enabled: true 

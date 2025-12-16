@@ -1,0 +1,36 @@
+flowdrop_pipeline.flowdrop_pipeline_type.*:
+  type: config_entity
+  label: 'FlowDrop Pipeline type config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    description:
+      type: string
+      label: 'Description'
+    default_max_concurrent_jobs:
+      type: integer
+      label: 'Default Max Concurrent Jobs'
+    default_job_priority_strategy:
+      type: string
+      label: 'Default Job Priority Strategy'
+    default_retry_strategy:
+      type: string
+      label: 'Default Retry Strategy'
+    execution_timeout:
+      type: integer
+      label: 'Execution Timeout'
+    memory_limit:
+      type: integer
+      label: 'Memory Limit'
+    allowed_workflow_types:
+      type: sequence
+      label: 'Allowed Workflow Types'
+      sequence:
+        type: string
+        label: 'Workflow Type'

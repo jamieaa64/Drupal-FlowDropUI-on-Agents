@@ -1,0 +1,13 @@
+status: true
+dependencies:
+  module:
+    - flowdrop_node_test
+  enforced:
+    module:
+      - flowdrop_node_test
+id: flowdrop_node_test
+label: FlowDrop Node Test
+description: 'Category used for collecting test nodes.'
+icon: 'mdi:cog'
+color: '#000000'
+enabled: null

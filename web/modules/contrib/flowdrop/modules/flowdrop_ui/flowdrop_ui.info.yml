@@ -1,0 +1,5 @@
+name: 'FlowDrop UI'
+type: module
+description: 'FlowDrop User Interface'
+package: FlowDrop
+core_version_requirement: ^11

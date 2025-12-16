@@ -1,0 +1,18 @@
+status: true
+dependencies:
+  module:
+    - flowdrop_node_test
+  enforced:
+    module:
+      - flowdrop_node_test
+id: test_start
+label: 'Test : Start'
+description: ''
+category: flowdrop_node_test
+icon: 'mdi:cog'
+color: '#000000'
+version: 1.0.0
+enabled: true
+config: {  }
+tags: {  }
+executor_plugin: start_node_processor

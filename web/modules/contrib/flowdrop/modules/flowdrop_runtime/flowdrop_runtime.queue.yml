@@ -1,0 +1,13 @@
+flowdrop_runtime_pipeline_execution:
+  title: "FlowDrop Runtime Pipeline Execution"
+  description: "Queue for processing FlowDrop pipeline execution tasks via runtime"
+  worker: "flowdrop_runtime.queue.pipeline_execution"
+  time: 300
+  memory: 128
+
+flowdrop_runtime_job_execution:
+  title: "FlowDrop Runtime Job Execution"
+  description: "Queue for processing FlowDrop job execution tasks via runtime"
+  worker: "flowdrop_runtime.queue.job_execution"
+  time: 300
+  memory: 128

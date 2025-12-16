@@ -1,0 +1,7 @@
+name: 'Tool - User'
+type: module
+description: 'Provides tools for user creation, modification and removal.'
+package: Tools
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - tool:tool

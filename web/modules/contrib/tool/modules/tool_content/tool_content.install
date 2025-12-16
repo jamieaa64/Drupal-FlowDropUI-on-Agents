@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update functions for Tool - Content.
+ */
+
+/**
+ * Install newly required 'serialization' dependency.
+ */
+function tool_content_update_10001() {
+  if (!\Drupal::moduleHandler()->moduleExists('serialization')) {
+    \Drupal::service('module_installer')->install('serialization', TRUE);
+  }
+}

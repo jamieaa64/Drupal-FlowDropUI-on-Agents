@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for flowdrop_workflow module.
+ */
+
+use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\flowdrop_workflow\Entity\FlowDropWorkflow;
+
+/**
+ * Implements hook_entity_operation_alter().
+ */
+function flowdrop_workflow_entity_operation_alter(array &$operations, EntityInterface $entity, $context) {
+  // Only alter operations for FlowDropWorkflow entities.
+  if (!$entity instanceof FlowDropWorkflow) {
+    return;
+  }
+
+  // Add "Open in Editor" operation.
+  if ($entity->id()) {
+    try {
+      $operations['open_in_flowdrop'] = [
+        'title' => t('Open in FlowDrop'),
+        'weight' => -1,
+        'url' => Url::fromRoute('flowdrop_workflow.editor.workflow.entity', [
+          'flowdrop_workflow' => $entity->id(),
+        ]),
+      ];
+    }
+    catch (\Exception $e) {
+      // Log the error and do not add the operation if URL generation fails.
+      \Drupal::logger('flowdrop_workflow')->error('Failed to generate Open in Editor URL for entity @id: @message', [
+        '@id' => $entity->id(),
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}

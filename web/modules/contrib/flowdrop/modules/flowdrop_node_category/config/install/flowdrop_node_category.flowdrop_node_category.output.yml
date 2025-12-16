@@ -1,0 +1,6 @@
+id: output
+label: 'Output'
+description: 'Node types that produce output data from workflows'
+icon: 'mdi:output'
+color: '#FF5722'
+enabled: true 

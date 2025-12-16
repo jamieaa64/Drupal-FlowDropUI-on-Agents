@@ -1,0 +1,4 @@
+services:
+  flowdrop_pipeline.job_generation:
+    class: Drupal\flowdrop_pipeline\Service\JobGenerationService
+    arguments: ['@entity_type.manager', '@logger.factory', '@event_dispatcher']

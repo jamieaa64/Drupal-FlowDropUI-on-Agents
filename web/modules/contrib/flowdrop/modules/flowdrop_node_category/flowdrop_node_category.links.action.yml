@@ -1,0 +1,5 @@
+entity.flowdrop_node_category.add_form:
+  route_name: 'entity.flowdrop_node_category.add_form'
+  title: 'Add flowdrop node category'
+  appears_on:
+    - entity.flowdrop_node_category.collection

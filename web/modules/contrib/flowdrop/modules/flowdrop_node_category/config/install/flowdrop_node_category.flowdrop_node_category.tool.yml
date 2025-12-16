@@ -1,0 +1,6 @@
+id: tool
+label: 'Tool'
+description: 'Node types for utility tools and helper functions'
+icon: 'mdi:wrench'
+color: '#6366f1'
+enabled: true 

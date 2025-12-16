@@ -1,0 +1,114 @@
+entity.flowdrop_workflow.collection:
+  path: '/admin/structure/flowdrop-workflow'
+  defaults:
+    _entity_list: 'flowdrop_workflow'
+    _title: 'FlowDrop Workflow configuration'
+  requirements:
+    _permission: 'administer flowdrop_workflow'
+
+entity.flowdrop_workflow.add_form:
+  path: '/admin/structure/flowdrop_workflow/add'
+  defaults:
+    _entity_form: 'flowdrop_workflow.add'
+    _title: 'Add a flowdrop workflow'
+  requirements:
+    _permission: 'administer flowdrop_workflow'
+
+entity.flowdrop_workflow.edit_form:
+  path: '/admin/structure/flowdrop-workflow/{flowdrop_workflow}'
+  defaults:
+    _entity_form: 'flowdrop_workflow.edit'
+    _title: 'Edit a flowdrop workflow'
+  requirements:
+    _permission: 'administer flowdrop_workflow'
+
+entity.flowdrop_workflow.delete_form:
+  path: '/admin/structure/flowdrop-workflow/{flowdrop_workflow}/delete'
+  defaults:
+    _entity_form: 'flowdrop_workflow.delete'
+    _title: 'Delete a flowdrop workflow'
+  requirements:
+    _permission: 'administer flowdrop_workflow'
+
+# API Routes for Workflow Management
+flowdrop_workflow.api.workflows:
+  path: '/api/flowdrop/workflows'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::getWorkflows'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_workflow.api.workflows.create:
+  path: '/api/flowdrop/workflows'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::createWorkflow'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [POST]
+
+flowdrop_workflow.api.workflows.get:
+  path: '/api/flowdrop/workflows/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::getWorkflow'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+
+flowdrop_workflow.api.workflows.update:
+  path: '/api/flowdrop/workflows/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::updateWorkflow'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [PUT]
+
+flowdrop_workflow.api.workflows.delete:
+  path: '/api/flowdrop/workflows/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::deleteWorkflow'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [DELETE]
+
+flowdrop_workflow.api.workflows.execute:
+  path: '/api/flowdrop/workflows/{id}/execute'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::implementationPending'
+  requirements:
+    _permission: 'administer flowdrop'
+
+flowdrop_workflow.api.workflows.execution.state:
+  path: '/api/flowdrop/workflows/{id}/executions/{execution_id}/state'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::implementationPending'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_workflow.api.workflows.executions.active:
+  path: '/api/flowdrop/executions/active'
+  defaults:
+    _controller: '\Drupal\flowdrop_workflow\Controller\Api\WorkflowsController::implementationPending'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+# Open workflow in editor route for entity links
+flowdrop_workflow.editor.workflow.entity:
+  path: '/admin/structure/flowdrop-workflow/{flowdrop_workflow}/flowdrop-editor'
+  defaults:
+    _title: 'FlowDrop Workflow Editor'
+    _controller: '\Drupal\flowdrop_workflow\Controller\WorkflowController::openWorkflowEntity'
+  requirements:
+    _permission: 'administer flowdrop_workflow'
+  options:
+    parameters:
+      flowdrop_workflow:
+        type: entity:flowdrop_workflow

@@ -1,0 +1,16 @@
+id: default_fallback
+label: 'Default Fallback'
+description: 'A default fallback node that requires no inputs and produces no outputs'
+category: helpers
+icon: 'mdi:help-circle'
+color: '#6b7280'
+version: '1.0.0'
+enabled: true
+config:
+  enabled: true
+  description: ''
+tags:
+  - helper
+  - fallback
+  - default
+executor_plugin: 'default_fallback'

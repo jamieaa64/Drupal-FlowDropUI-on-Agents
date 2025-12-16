@@ -1,0 +1,73 @@
+{
+	"name": "@drupal/flowdrop",
+	"description": "IIFE wrapper for @d34dman/flowdrop - enables browser-native usage without module bundlers",
+	"private": true,
+	"version": "0.0.1",
+	"scripts": {
+		"build:drupal": "vite build --config vite.config.drupal.ts",
+		"build:production": "vite build --config vite.config.production.ts",
+		"build": "npm run build:production",
+		"watch:build:drupal": "npm-watch build:drupal",
+		"watch:build:production": "npm-watch build:production",
+		"lint": "eslint . && prettier --check .",
+		"format": "prettier --write ."
+	},
+	"watch": {
+		"build:drupal": {
+			"ignore": "build",
+			"patterns": [
+				"src"
+			],
+			"extensions": "js,ts",
+			"quiet": true,
+			"legacyWatch": true,
+			"delay": 2500,
+			"runOnChangeOnly": false
+		},
+		"build:production": {
+			"ignore": "build",
+			"patterns": [
+				"src"
+			],
+			"extensions": "js,ts",
+			"quiet": true,
+			"legacyWatch": true,
+			"delay": 2500,
+			"runOnChangeOnly": false
+		}
+	},
+	"files": [
+		"build/flowdrop/*.js",
+		"build/flowdrop/*.css",
+		"build/flowdrop/*.map",
+		"IIFE_USAGE.md",
+		"README.md"
+	],
+	"type": "module",
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@types/node": "^20",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"npm-watch": "^0.13.0",
+		"prettier": "^3.4.2",
+		"svelte": "^5.0.0",
+		"terser": "^5.43.1",
+		"typescript": "^5.0.0",
+		"vite": "^6.2.6"
+	},
+	"keywords": [
+		"flowdrop",
+		"workflow",
+		"iife",
+		"browser",
+		"svelte",
+		"visual-workflow",
+		"drupal",
+		"no-bundler"
+	],
+	"dependencies": {
+		"@d34dman/flowdrop": "^0.0.16",
+		"@iconify/svelte": "^5.1.0"
+	}
+}

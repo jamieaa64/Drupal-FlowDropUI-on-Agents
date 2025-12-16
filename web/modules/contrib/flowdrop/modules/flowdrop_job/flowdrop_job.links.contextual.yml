@@ -1,0 +1,10 @@
+entity.flowdrop_job.edit_form:
+  route_name: entity.flowdrop_job.edit_form
+  group: flowdrop_job
+  title: 'Edit'
+
+entity.flowdrop_job.delete_form:
+  route_name: entity.flowdrop_job.delete_form
+  group: flowdrop_job
+  title: 'Delete'
+  weight: 10

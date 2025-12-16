@@ -1,0 +1,8 @@
+name: 'Tool - AI Connector'
+type: module
+description: '(Experimental) Provides tools as function calls for the AI module.'
+package: Tools
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - tool:tool
+  - ai:ai

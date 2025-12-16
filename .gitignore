@@ -3,10 +3,20 @@
 /drush/contrib/
 /vendor/
 /web/core/
-/web/modules/contrib/
 /web/themes/contrib/
 /web/profiles/contrib/
 /web/libraries/
+
+# Ignore most contrib modules (managed by Composer)
+/web/modules/contrib/
+# But track these contrib modules we're modifying for patches:
+!/web/modules/contrib/ai/
+!/web/modules/contrib/ai_agents/
+!/web/modules/contrib/ai_assistant_api/
+!/web/modules/contrib/ai_chatbot/
+!/web/modules/contrib/flowdrop/
+!/web/modules/contrib/flowdrop_ai_provider/
+!/web/modules/contrib/tool/
 
 # Ignore sensitive information
 /web/sites/*/settings.local.php

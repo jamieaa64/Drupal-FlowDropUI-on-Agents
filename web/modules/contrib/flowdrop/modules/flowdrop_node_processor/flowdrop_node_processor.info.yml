@@ -1,0 +1,8 @@
+name: 'FlowDrop Node Processor'
+type: module
+description: 'FlowDrop Node Processesors'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_type

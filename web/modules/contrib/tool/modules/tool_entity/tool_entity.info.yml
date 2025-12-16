@@ -1,0 +1,8 @@
+name: 'Tool - Entity'
+type: module
+description: 'Provides tools for creating, modifying and describing content entity and field definitions.'
+package: Tools
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - tool:tool
+  - drupal:serialization

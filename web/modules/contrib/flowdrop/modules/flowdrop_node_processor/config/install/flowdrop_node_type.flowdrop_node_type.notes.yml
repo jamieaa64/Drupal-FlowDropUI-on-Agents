@@ -1,0 +1,18 @@
+id: notes
+label: 'Notes'
+description: 'Add documentation and comments to your workflow with Markdown support'
+category: tools
+icon: 'mdi:note-text'
+color: '#fbbf24'
+version: '1.0.0'
+enabled: true
+config:
+  content: "# Workflow Notes\n\nAdd your documentation here using **Markdown** formatting.\n\n## Features\n- Supports **bold** and *italic* text\n- Create lists and code blocks\n- Add links and more!"
+  noteType: 'info'
+tags:
+  - tools
+  - notes
+  - documentation
+  - comments
+  - markdown
+executor_plugin: 'notes' 

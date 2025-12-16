@@ -1,0 +1,16 @@
+id: webhook
+label: 'Webhook'
+description: 'Receive data from external webhooks'
+category: input
+icon: 'mdi:webhook'
+color: '#06b6d4'
+version: '1.0.0'
+enabled: true
+config:
+  endpoint: ''
+  method: 'POST'
+tags:
+  - input
+  - webhook
+  - external
+executor_plugin: 'webhook'

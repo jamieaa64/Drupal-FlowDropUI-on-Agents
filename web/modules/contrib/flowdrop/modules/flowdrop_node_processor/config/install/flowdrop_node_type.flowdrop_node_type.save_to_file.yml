@@ -1,0 +1,17 @@
+id: save_to_file
+label: 'Save to File'
+description: 'Save data to various file formats'
+category: data
+icon: 'mdi:content-save'
+color: '#ef4444'
+version: '1.0.0'
+enabled: true
+config:
+  fileFormat: 'json'
+  filePath: './output/data.json'
+tags:
+  - data
+  - save
+  - file
+  - export
+executor_plugin: 'save_to_file'

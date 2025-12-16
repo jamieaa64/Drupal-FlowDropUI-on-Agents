@@ -1,0 +1,47 @@
+flowdrop_node_type.flowdrop_node_type.*:
+  type: config_entity
+  label: 'FlowDrop Node Type'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+      label: 'UUID'
+    description:
+      type: string
+      label: 'Description'
+    category:
+      type: string
+      label: 'Category'
+    icon:
+      type: string
+      label: 'Icon'
+    color:
+      type: string
+      label: 'Color'
+    version:
+      type: string
+      label: 'Version'
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    config:
+      type: mapping
+      label: 'Node Config'
+      mapping:
+        '*':
+          type: any
+          label: 'Config'
+    tags:
+      type: sequence
+      label: 'Tags'
+      sequence:
+        type: string
+        label: 'Tag'
+    executor_plugin:
+      type: string
+      label: 'Executor Plugin ID'

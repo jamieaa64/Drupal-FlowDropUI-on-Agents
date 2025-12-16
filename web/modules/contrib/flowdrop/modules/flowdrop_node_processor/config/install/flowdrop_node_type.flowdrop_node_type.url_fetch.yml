@@ -1,0 +1,19 @@
+id: url_fetch
+label: 'URL Fetch'
+description: 'Fetch content from URLs'
+category: input
+icon: 'mdi:link'
+color: '#3b82f6'
+version: '1.0.0'
+enabled: true
+config:
+  urls: []
+  maxDepth: 1
+  format: 'text'
+  timeout: 30
+tags:
+  - input
+  - url
+  - web
+  - fetch
+executor_plugin: 'url_fetch'

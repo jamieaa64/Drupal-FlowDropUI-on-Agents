@@ -1,0 +1,18 @@
+id: chroma_vector_store
+label: 'Chroma Vector Store'
+description: 'Store and retrieve vectors using Chroma'
+category: vector_store
+icon: 'mdi:database'
+color: '#84cc16'
+version: '1.0.0'
+enabled: true
+config:
+  collectionName: 'default'
+  persistDirectory: './chroma_db'
+  distanceFunction: 'cosine'
+tags:
+  - integration
+  - vector-store
+  - chroma
+  - embeddings
+executor_plugin: 'chroma_vector_store'

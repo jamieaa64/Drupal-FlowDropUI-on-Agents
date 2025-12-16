@@ -1,0 +1,107 @@
+# Generate jobs for a pipeline
+entity.flowdrop_pipeline.generate_jobs:
+  path: '/admin/content/flowdrop-pipeline/{flowdrop_pipeline}/generate-jobs'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineController::generateJobs'
+    _title: 'Generate Jobs'
+  requirements:
+    _permission: 'edit flowdrop_pipeline'
+  options:
+    parameters:
+      flowdrop_pipeline:
+        type: entity:flowdrop_pipeline
+
+# Clear jobs for a pipeline
+entity.flowdrop_pipeline.clear_jobs:
+  path: '/admin/content/flowdrop-pipeline/{flowdrop_pipeline}/clear-jobs'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineController::clearJobs'
+    _title: 'Clear Jobs'
+  requirements:
+    _permission: 'edit flowdrop_pipeline'
+  options:
+    parameters:
+      flowdrop_pipeline:
+        type: entity:flowdrop_pipeline
+
+# List jobs for a pipeline
+entity.flowdrop_pipeline.jobs:
+  path: '/admin/content/flowdrop-pipeline/{flowdrop_pipeline}/jobs'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineController::listJobs'
+    _title: 'Jobs'
+  requirements:
+    _permission: 'view flowdrop_job'
+  options:
+    parameters:
+      flowdrop_pipeline:
+        type: entity:flowdrop_pipeline
+
+# List pipelines for a workflow
+entity.flowdrop_workflow.pipelines:
+  path: '/admin/structure/flowdrop-workflow/{flowdrop_workflow}/pipelines'
+  defaults:
+    _title: 'Pipelines'
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineController::listWorkflowPipelines'
+  requirements:
+    _permission: 'view flowdrop_pipeline'
+  options:
+    parameters:
+      flowdrop_workflow:
+        type: entity:flowdrop_workflow
+
+# API endpoint to get pipelines for a workflow
+flowdrop_pipeline.api.workflow_pipelines:
+  path: '/api/flowdrop/workflow/{workflow_id}/pipelines'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineApiController::getWorkflowPipelines'
+    _title: 'Workflow Pipelines API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_pipeline'
+  methods: [GET]
+  options:
+    parameters:
+      workflow_id:
+        type: string
+
+# API endpoint to get a specific pipeline
+flowdrop_pipeline.api.pipeline:
+  path: '/api/flowdrop/pipeline/{pipeline_id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineApiController::getPipeline'
+    _title: 'Pipeline API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_pipeline'
+  methods: [GET]
+  options:
+    parameters:
+      pipeline_id:
+        type: string
+
+# API endpoint to get pipeline execution status
+flowdrop_pipeline.api.pipeline_status:
+  path: '/api/flowdrop/pipeline/{pipeline_id}/status'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineApiController::getPipelineStatus'
+    _title: 'Pipeline Status API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_pipeline'
+  methods: [GET]
+  options:
+    parameters:
+      pipeline_id:
+        type: string
+
+# API endpoint to get pipeline execution logs
+flowdrop_pipeline.api.pipeline_logs:
+  path: '/api/flowdrop/pipeline/{pipeline_id}/logs'
+  defaults:
+    _controller: '\Drupal\flowdrop_pipeline\Controller\PipelineApiController::getPipelineLogs'
+    _title: 'Pipeline Logs API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_pipeline'
+  methods: [GET]
+  options:
+    parameters:
+      pipeline_id:
+        type: string

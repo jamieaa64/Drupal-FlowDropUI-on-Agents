@@ -1,0 +1,5 @@
+name: 'FlowDrop Node Category'
+type: module
+description: 'Provides node category entity type for organizing workflow nodes.'
+package: 'FlowDrop'
+core_version_requirement: ^11

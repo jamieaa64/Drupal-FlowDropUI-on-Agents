@@ -1,0 +1,5 @@
+name: 'FlowDrop'
+type: module
+description: 'A powerful visual workflow editor for Drupal with AI integration, data processing, and automation capabilities. Provides drag-and-drop interface for building complex workflows with 25+ node types including AI models, data processing, HTTP operations, and more.'
+package: FlowDrop
+core_version_requirement: ^11

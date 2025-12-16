@@ -1,0 +1,10 @@
+name: 'FlowDrop Pipeline'
+type: module
+description: 'Provides pipeline entity type for workflow execution orchestration.'
+package: 'FlowDrop'
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop_job
+  - flowdrop:flowdrop_workflow
+  - drupal:options
+  - drupal:text

@@ -1,0 +1,4 @@
+services:
+  flowdrop_node_type.manager:
+    class: Drupal\flowdrop_node_type\Service\FlowDropNodeTypeManager
+    arguments: ['@entity_type.manager', '@logger.factory', '@flowdrop.node_processor_plugin_manager']

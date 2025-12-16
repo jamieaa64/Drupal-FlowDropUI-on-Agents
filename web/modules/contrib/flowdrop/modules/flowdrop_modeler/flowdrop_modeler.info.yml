@@ -1,0 +1,10 @@
+name: 'FlowDrop Modeler'
+type: module
+description: 'FlowDrop Integration with Modeler API. An experiemental module to try out integration with modeler_api.'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop_ui
+  - drupal:modeler_api
+  - bpmn_io:bpmn_io
+experimental: true

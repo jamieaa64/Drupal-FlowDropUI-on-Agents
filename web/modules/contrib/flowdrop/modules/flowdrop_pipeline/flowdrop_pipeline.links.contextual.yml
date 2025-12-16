@@ -1,0 +1,10 @@
+entity.flowdrop_pipeline.edit_form:
+  route_name: entity.flowdrop_pipeline.edit_form
+  group: flowdrop_pipeline
+  title: 'Edit'
+
+entity.flowdrop_pipeline.delete_form:
+  route_name: entity.flowdrop_pipeline.delete_form
+  group: flowdrop_pipeline
+  title: 'Delete'
+  weight: 10

@@ -1,0 +1,20 @@
+id: http_request
+label: 'HTTP Request'
+description: 'Make HTTP requests to external APIs and services'
+category: tool
+icon: 'mdi:web'
+color: '#3b82f6'
+version: '1.0.0'
+enabled: true
+config:
+  method: 'GET'
+  url: ''
+  headers: {}
+  timeout: 30
+  followRedirects: true
+tags:
+  - tool
+  - http
+  - api
+  - request
+executor_plugin: 'http_request'

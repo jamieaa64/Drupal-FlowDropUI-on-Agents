@@ -1,0 +1,11 @@
+entity.flowdrop_pipeline_type.collection:
+  title: 'FlowDrop Pipeline types'
+  description: 'Manage and CRUD actions on FlowDrop Pipeline type.'
+  parent: system.admin_structure
+  route_name: entity.flowdrop_pipeline_type.collection
+
+entity.flowdrop_pipeline.collection:
+  title: 'FlowDrop Pipelines'
+  description: 'List of flowdrop pipelines.'
+  route_name: entity.flowdrop_pipeline.collection
+  parent: system.admin_content

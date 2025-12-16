@@ -1,0 +1,30 @@
+flowdrop_job.flowdrop_job_type.*:
+  type: config_entity
+  label: 'FlowDrop Job type config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    description:
+      type: string
+      label: 'Description'
+    default_priority:
+      type: integer
+      label: 'Default Priority'
+    default_max_retries:
+      type: integer
+      label: 'Default Max Retries'
+    node_executor_plugin:
+      type: string
+      label: 'Node Executor Plugin'
+    execution_timeout:
+      type: integer
+      label: 'Execution Timeout'
+    memory_limit:
+      type: integer
+      label: 'Memory Limit'

@@ -1,0 +1,5 @@
+entity.flowdrop_workflow.add_form:
+  route_name: 'entity.flowdrop_workflow.add_form'
+  title: 'Add flowdrop workflow'
+  appears_on:
+    - entity.flowdrop_workflow.collection

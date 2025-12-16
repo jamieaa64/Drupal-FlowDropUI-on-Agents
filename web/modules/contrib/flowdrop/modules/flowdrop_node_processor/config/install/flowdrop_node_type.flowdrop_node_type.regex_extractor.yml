@@ -1,0 +1,17 @@
+id: regex_extractor
+label: 'Regex Extractor'
+description: 'Extract patterns using regular expressions'
+category: processing
+icon: 'mdi:regex'
+color: '#ec4899'
+version: '1.0.0'
+enabled: true
+config:
+  pattern: ''
+  flags: 'g'
+tags:
+  - processing
+  - regex
+  - extract
+  - pattern
+executor_plugin: 'regex_extractor'

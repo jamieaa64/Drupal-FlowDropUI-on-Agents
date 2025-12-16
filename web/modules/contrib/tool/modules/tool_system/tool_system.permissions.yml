@@ -1,0 +1,18 @@
+# Permissions for tool_system module tools
+
+# Display Message Tool
+use display_message tool:
+  title: 'Use Display Message Tool'
+  description: 'Allows users to display messages through the Drupal messenger system.'
+
+# Log Message Tool
+use log_message tool:
+  title: 'Use Log Message Tool'
+  description: 'Allows users to log messages to the Drupal logging system.'
+  restrict access: true
+
+# Send Email Tool
+use send_email tool:
+  title: 'Use Send Email Tool'
+  description: 'Allows users to send emails through the system.'
+  restrict access: true

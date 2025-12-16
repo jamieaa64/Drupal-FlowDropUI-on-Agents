@@ -1,0 +1,11 @@
+flowdrop_pipeline.type_add:
+  title: 'Add flowdrop pipeline type'
+  route_name: entity.flowdrop_pipeline_type.add_form
+  appears_on:
+    - entity.flowdrop_pipeline_type.collection
+
+flowdrop_pipeline.add_page:
+  title: 'Add flowdrop pipeline'
+  route_name: entity.flowdrop_pipeline.add_page
+  appears_on:
+    - entity.flowdrop_pipeline.collection

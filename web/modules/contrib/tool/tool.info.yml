@@ -1,0 +1,5 @@
+name: 'Tool'
+type: module
+description: 'Provides a tool plugin for creating well defined actions.'
+package: Tools
+core_version_requirement: ^10.3 || ^11

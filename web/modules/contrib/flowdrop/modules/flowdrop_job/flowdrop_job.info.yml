@@ -1,0 +1,8 @@
+name: 'FlowDrop Job'
+type: module
+description: 'Provides job entity type for individual workflow node execution.'
+package: 'FlowDrop'
+core_version_requirement: ^11
+dependencies:
+  - drupal:options
+  - drupal:text

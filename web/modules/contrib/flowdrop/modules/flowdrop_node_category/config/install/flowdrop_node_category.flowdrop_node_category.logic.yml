@@ -1,0 +1,6 @@
+id: logic
+label: 'Logic'
+description: 'Node types for conditional logic and control flow'
+icon: 'mdi:git-branch'
+color: '#06b6d4'
+enabled: true 

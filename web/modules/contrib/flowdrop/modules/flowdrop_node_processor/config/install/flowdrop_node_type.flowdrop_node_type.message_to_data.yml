@@ -1,0 +1,14 @@
+id: message_to_data
+label: 'Message to Data'
+description: 'Convert Message objects to Data objects'
+category: data
+icon: 'mdi:message-arrow-right'
+color: '#f59e0b'
+version: '1.0.0'
+enabled: true
+config: []
+tags:
+  - data
+  - message
+  - convert
+executor_plugin: 'message_to_data'

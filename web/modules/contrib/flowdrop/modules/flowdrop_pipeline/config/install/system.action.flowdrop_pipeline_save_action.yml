@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - flowdrop_pipeline
+id: flowdrop_pipeline_save_action
+label: 'Save flowdrop pipelines'
+type: flowdrop_pipeline
+plugin: entity:save_action:flowdrop_pipeline
+configuration: {  }

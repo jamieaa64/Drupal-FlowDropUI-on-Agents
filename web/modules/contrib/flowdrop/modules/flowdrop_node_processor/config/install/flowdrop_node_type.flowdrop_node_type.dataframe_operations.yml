@@ -1,0 +1,19 @@
+id: dataframe_operations
+label: 'DataFrame Operations'
+description: 'Perform operations on DataFrames'
+category: processing
+icon: 'mdi:table-cog'
+color: '#84cc16'
+version: '1.0.0'
+enabled: true
+config:
+  operation: 'filter'
+  columnName: ''
+  filterValue: ''
+  ascending: true
+tags:
+  - processing
+  - dataframe
+  - table
+  - operations
+executor_plugin: 'dataframe_operations'

@@ -1,0 +1,74 @@
+services:
+  # Core Runtime Services
+  flowdrop_runtime.node_runtime:
+    class: Drupal\flowdrop_runtime\Service\Runtime\NodeRuntimeService
+    arguments: ['@logger.factory', '@event_dispatcher', '@flowdrop.node_processor_plugin_manager', '@flowdrop_runtime.real_time_manager']
+
+  flowdrop_runtime.execution_context:
+    class: Drupal\flowdrop_runtime\Service\Runtime\ExecutionContext
+    arguments: ['@logger.factory']
+
+  # Real-Time Services
+  flowdrop_runtime.real_time_manager:
+    class: Drupal\flowdrop_runtime\Service\RealTime\RealTimeManager
+    arguments: ['@logger.factory', '@flowdrop_runtime.event_broadcaster', '@flowdrop_runtime.status_tracker', '@event_dispatcher']
+
+  flowdrop_runtime.status_tracker:
+    class: Drupal\flowdrop_runtime\Service\RealTime\StatusTracker
+    arguments: ['@logger.factory']
+
+  flowdrop_runtime.event_broadcaster:
+    class: Drupal\flowdrop_runtime\Service\RealTime\EventBroadcaster
+    arguments: ['@logger.factory', '@event_dispatcher']
+
+  # Compiler Services
+  flowdrop_runtime.workflow_compiler:
+    class: Drupal\flowdrop_runtime\Service\Compiler\WorkflowCompiler
+    arguments: ['@logger.factory']
+
+  # Orchestrator Services
+  flowdrop_runtime.orchestrator_manager:
+    class: Drupal\flowdrop_runtime\Service\Orchestrator\OrchestratorPluginManager
+    arguments: ['@service_container', '@cache.discovery', '@module_handler']
+
+  flowdrop_runtime.synchronous_orchestrator:
+    class: Drupal\flowdrop_runtime\Service\Orchestrator\SynchronousOrchestrator
+    arguments: ['@flowdrop_runtime.node_runtime', '@flowdrop_runtime.execution_context', '@flowdrop_runtime.real_time_manager', '@flowdrop_runtime.workflow_compiler', '@logger.factory', '@event_dispatcher']
+    tags:
+      - { name: flowdrop_runtime.orchestrator, id: synchronous }
+
+  flowdrop_runtime.asynchronous_orchestrator:
+    class: Drupal\flowdrop_runtime\Service\Orchestrator\AsynchronousOrchestrator
+    arguments: ['@entity_type.manager', '@queue', '@logger.factory', '@event_dispatcher']
+    tags:
+      - { name: flowdrop_runtime.orchestrator, id: asynchronous }
+
+  # Data Flow Services
+  flowdrop_runtime.data_flow_manager:
+    class: Drupal\flowdrop_runtime\Service\DataFlow\DataFlowManager
+    arguments: ['@logger.factory']
+
+  # Error Handling Services
+  flowdrop_runtime.error_handler:
+    class: Drupal\flowdrop_runtime\Service\ErrorHandling\ErrorHandler
+    arguments: ['@logger.factory', '@event_dispatcher']
+
+  # Monitoring Services
+  flowdrop_runtime.execution_monitor:
+    class: Drupal\flowdrop_runtime\Service\Monitoring\ExecutionMonitor
+    arguments: ['@logger.factory', '@event_dispatcher']
+
+
+
+  # Queue Workers
+  flowdrop_runtime.queue.pipeline_execution:
+    class: Drupal\flowdrop_runtime\Plugin\QueueWorker\PipelineExecutionWorker
+    arguments: ['@flowdrop_runtime.asynchronous_orchestrator', '@entity_type.manager', '@logger.factory']
+    tags:
+      - { name: queue_worker, id: flowdrop_runtime_pipeline_execution }
+
+  flowdrop_runtime.queue.job_execution:
+    class: Drupal\flowdrop_runtime\Plugin\QueueWorker\JobExecutionWorker
+    arguments: ['@flowdrop_runtime.node_runtime', '@flowdrop_runtime.asynchronous_orchestrator', '@entity_type.manager', '@logger.factory']
+    tags:
+      - { name: queue_worker, id: flowdrop_runtime_job_execution }

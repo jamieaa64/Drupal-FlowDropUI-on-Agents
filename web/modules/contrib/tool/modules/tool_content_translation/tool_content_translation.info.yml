@@ -1,0 +1,8 @@
+name: 'Tool - Content Translation'
+type: module
+description: 'Content translation tools.'
+package: Tools
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - tool:tool
+  - drupal:content_translation

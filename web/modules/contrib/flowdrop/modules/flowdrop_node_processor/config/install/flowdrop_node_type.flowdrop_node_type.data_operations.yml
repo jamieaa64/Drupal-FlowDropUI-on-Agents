@@ -1,0 +1,18 @@
+id: data_operations
+label: 'Data Operations'
+description: 'Perform operations on Data objects'
+category: processing
+icon: 'mdi:database-cog'
+color: '#6366f1'
+version: '1.0.0'
+enabled: true
+config:
+  operation: 'select_keys'
+  keys: []
+  filterKey: ''
+  filterValue: ''
+tags:
+  - processing
+  - data
+  - operations
+executor_plugin: 'data_operations'

@@ -1,0 +1,22 @@
+id: file_upload
+label: 'File Upload'
+description: 'Upload and process files of various formats'
+category: input
+icon: 'mdi:file-upload'
+color: '#ef4444'
+version: '1.0.0'
+enabled: true
+config:
+  allowedTypes:
+    - txt
+    - pdf
+    - docx
+    - csv
+    - json
+  maxSize: 10485760
+tags:
+  - input
+  - file
+  - upload
+  - document
+executor_plugin: 'file_upload'

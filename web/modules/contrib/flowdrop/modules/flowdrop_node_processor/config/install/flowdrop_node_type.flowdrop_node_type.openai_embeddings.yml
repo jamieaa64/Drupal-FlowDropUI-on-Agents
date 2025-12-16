@@ -1,0 +1,16 @@
+id: openai_embeddings
+label: 'OpenAI Embeddings'
+description: 'Generate embeddings using OpenAI models'
+category: embedding
+icon: 'mdi:vector-point'
+color: '#10a37f'
+version: '1.0.0'
+enabled: true
+config:
+  model: 'text-embedding-3-small'
+  apiKey: ''
+tags:
+  - embeddings
+  - openai
+  - vector
+executor_plugin: 'openai_embeddings'

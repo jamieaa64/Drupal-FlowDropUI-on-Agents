@@ -1,0 +1,86 @@
+entity.flowdrop_node_type.collection:
+  path: '/admin/structure/flowdrop-node-type'
+  defaults:
+    _entity_list: 'flowdrop_node_type'
+    _title: 'FlowDrop Node Type configuration'
+  requirements:
+    _permission: 'administer flowdrop_node_type'
+
+entity.flowdrop_node_type.add_form:
+  path: '/admin/structure/flowdrop-node-type/add'
+  defaults:
+    _entity_form: 'flowdrop_node_type.add'
+    _title: 'Add a flowdrop node type'
+  requirements:
+    _permission: 'administer flowdrop_node_type'
+
+entity.flowdrop_node_type.edit_form:
+  path: '/admin/structure/flowdrop-node-type/{flowdrop_node_type}'
+  defaults:
+    _entity_form: 'flowdrop_node_type.edit'
+    _title: 'Edit a flowdrop node type'
+  requirements:
+    _permission: 'administer flowdrop_node_type'
+
+entity.flowdrop_node_type.delete_form:
+  path: '/admin/structure/flowdrop-node-type/{flowdrop_node_type}/delete'
+  defaults:
+    _entity_form: 'flowdrop_node_type.delete'
+    _title: 'Delete a flowdrop node type'
+  requirements:
+    _permission: 'administer flowdrop_node_type'
+
+# API Routes for Node Types
+flowdrop_node_type.api.nodes:
+  path: '/api/flowdrop/nodes'
+  defaults:
+    _controller: '\Drupal\flowdrop_node_type\Controller\Api\NodesController::getNodes'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_node_type.api.nodes.category:
+  path: '/api/flowdrop/nodes/{category}'
+  defaults:
+    _controller: '\Drupal\flowdrop_node_type\Controller\Api\NodesController::getNodesByCategory'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_node_type.api.nodes.metadata:
+  path: '/api/flowdrop/nodes/{plugin_id}/metadata'
+  defaults:
+    _controller: '\Drupal\flowdrop_node_type\Controller\Api\NodesController::getNodeMetadata'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    parameters:
+      plugin_id:
+        type: string
+
+flowdrop_node_type.api.port_config:
+  path: '/api/flowdrop/port-config'
+  defaults:
+    _controller: '\Drupal\flowdrop_node_type\Controller\Api\NodesController::getPortConfiguration'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_node_type.api.nodes.validate_config:
+  path: '/api/flowdrop/nodes/{plugin_id}/validate'
+  defaults:
+    _controller: '\Drupal\flowdrop_node_type\Controller\Api\NodesController::validateConfiguration'
+  requirements:
+    _permission: 'administer flowdrop'
+  methods: [POST]
+  options:
+    parameters:
+      plugin_id:
+        type: string

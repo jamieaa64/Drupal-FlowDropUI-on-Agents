@@ -1,0 +1,118 @@
+flowdrop_workflow.flowdrop_workflow.*:
+  type: config_entity
+  label: 'FlowDrop Workflow'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: string
+      label: 'Label'
+    description:
+      type: string
+      label: 'Description'
+    nodes:
+      type: sequence
+      label: 'Nodes'
+      sequence:
+        type: mapping
+        mapping:
+          id:
+            type: string
+            label: 'Node ID'
+          type:
+            type: string
+            label: 'Node type'
+          position:
+            type: mapping
+            label: 'Position'
+            mapping:
+              x:
+                type: integer
+                label: 'X coordinate'
+              y:
+                type: integer
+                label: 'Y coordinate'
+          data:
+            type: mapping
+            label: 'Node data'
+            mapping:
+              type:
+                type: string
+                label: 'Node type'
+              label:
+                type: string
+                label: 'Node label'
+              config:
+                type: ignore
+                label: 'Node configuration'
+              metadata:
+                type: ignore
+                label: 'Node metadata'
+              nodeId:
+                type: string
+                label: 'React Flow Node ID'
+          deletable:
+            type: boolean
+            label: 'Node deletable flag'
+          measured:
+            type: ignore
+            label: 'Node measured dimensions'
+          selected:
+            type: boolean
+            label: 'Node selected flag'
+          dragging:
+            type: boolean
+            label: 'Node dragging flag'
+    edges:
+      type: sequence
+      label: 'Edges'
+      sequence:
+        type: mapping
+        mapping:
+          id:
+            type: string
+            label: 'Edge ID'
+          source:
+            type: string
+            label: 'Source node ID'
+          target:
+            type: string
+            label: 'Target node ID'
+          data:
+            type: mapping
+            label: 'Edge data'
+            mapping:
+              isToolConnection:
+                type: boolean
+                label: 'Is tool connection flag'
+              targetNodeType:
+                type: string
+                label: 'Target node type'
+              targetCategory:
+                type: string
+                label: 'Target node category'
+          sourceHandle:
+            type: string
+            label: 'Source handle ID'
+          targetHandle:
+            type: string
+            label: 'Target handle ID'
+          style:
+            type: ignore
+            label: 'Edge style properties'
+          markerEnd:
+            type: ignore
+            label: 'Edge marker end properties'
+    metadata:
+      type: ignore
+      label: 'Metadata'
+    created:
+      type: integer
+      label: 'Created timestamp'
+    changed:
+      type: integer
+      label: 'Changed timestamp'
+    uid:
+      type: integer
+      label: 'User ID'

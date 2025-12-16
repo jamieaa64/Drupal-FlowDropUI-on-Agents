@@ -1,0 +1,41 @@
+# API endpoint to get jobs for a pipeline
+flowdrop_job.api.pipeline_jobs:
+  path: '/api/flowdrop/pipeline/{pipeline_id}/jobs'
+  defaults:
+    _controller: '\Drupal\flowdrop_job\Controller\JobApiController::getPipelineJobs'
+    _title: 'Pipeline Jobs API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_job'
+  methods: [GET]
+  options:
+    parameters:
+      pipeline_id:
+        type: string
+
+# API endpoint to get job status summary for a pipeline
+flowdrop_job.api.pipeline_job_status:
+  path: '/api/flowdrop/pipeline/{pipeline_id}/job-status'
+  defaults:
+    _controller: '\Drupal\flowdrop_job\Controller\JobApiController::getPipelineJobStatus'
+    _title: 'Pipeline Job Status API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_job'
+  methods: [GET]
+  options:
+    parameters:
+      pipeline_id:
+        type: string
+
+# API endpoint to get a specific job
+flowdrop_job.api.job:
+  path: '/api/flowdrop/job/{job_id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_job\Controller\JobApiController::getJob'
+    _title: 'Job API'
+  requirements:
+    _permission: 'administer flowdrop+view flowdrop_job'
+  methods: [GET]
+  options:
+    parameters:
+      job_id:
+        type: string

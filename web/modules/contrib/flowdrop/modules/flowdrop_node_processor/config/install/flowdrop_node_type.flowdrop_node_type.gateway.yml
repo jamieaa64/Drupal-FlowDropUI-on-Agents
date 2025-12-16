@@ -1,0 +1,21 @@
+id: gateway
+label: 'Gateway'
+description: 'Split execution paths based on conditions for workflow branching'
+category: control
+icon: 'mdi:source-branch'
+color: '#10b981'
+version: '1.0.0'
+enabled: true
+config:
+  gatewayType: 'exclusive'
+  branches: []
+  defaultBranch: ''
+  description: ''
+tags:
+  - gateway
+  - branch
+  - control
+  - flow
+  - split
+  - condition
+executor_plugin: 'gateway'

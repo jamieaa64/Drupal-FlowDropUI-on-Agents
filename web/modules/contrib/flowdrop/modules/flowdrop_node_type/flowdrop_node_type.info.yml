@@ -1,0 +1,8 @@
+name: 'FlowDrop Node Type'
+type: module
+description: 'Provides node type entity type for configurable workflow nodes.'
+package: 'FlowDrop'
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_category

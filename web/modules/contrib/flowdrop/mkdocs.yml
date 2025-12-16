@@ -1,0 +1,84 @@
+site_name: FlowDrop Documentation
+site_description: Comprehensive documentation for FlowDrop - A powerful visual workflow editor for Drupal
+site_author: Shibin Das (d34dman)
+repo_url: https://git.drupalcode.org/project/flowdrop
+repo_name: FlowDrop
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    primary: indigo
+    accent: indigo
+  font:
+    text: Roboto
+    code: Roboto Mono
+  logo: logo.png
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.emoji
+  - pymdownx.tasklist
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Development:
+      - Quick Reference:
+        - Getting Started: development/quick-reference/getting-started.md
+        - Defining Node: development/quick-reference/define-node.md
+      - Under the hood:  
+        - Module Dependency: development/module-dependency.md
+        - FlowDrop Node Processor: development/flowdrop-node-processor.md
+  - Modules:
+      - FlowDrop Workflow: modules/flowdrop_workflow.md
+      - FlowDrop Node Type: modules/flowdrop_node_type.md
+  - Meta:
+      - Architecture:
+        - FlowDrop ERD: meta/flowdrop-erd.md
+        - Solution Comparison: meta/solution-comparison.md
+        - Glossary: meta/glossary.md
+      - Learnings:
+        - Experiments with Modeler API: meta/learnings/experiments-with-modeler_api.md
+        - Drupal Entities Context JSON: meta/learnings/drupal-entities-context-json.md
+docs_dir: docs
+site_dir: site
+
+plugins:
+  - search:
+      lang: en
+  # - mike:
+  #     alias_type: redirect
+  #     # This is for SEO reasons, not redirects.
+  #     canonical_version: 0.0.1
+  #     version_selector: true
+  #     deploy_prefix: "mkdocs"
+
+extra:
+  social:
+    - icon: fontawesome/brands/drupal
+      link: https://www.drupal.org/project/flowdrop
+    - icon: fontawesome/brands/gitlab
+      link: https://git.drupalcode.org/project/flowdrop
+    - icon: fontawesome/brands/slack
+      link: https://drupal.slack.com/archives/C098YQJEQLT
+  # version:
+  #   provider: mike

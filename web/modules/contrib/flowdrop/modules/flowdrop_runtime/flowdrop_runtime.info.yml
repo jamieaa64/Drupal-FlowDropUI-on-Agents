@@ -1,0 +1,11 @@
+name: 'FlowDrop Runtime'
+type: module
+description: 'Runtime execution engine for FlowDrop workflows with real-time monitoring'
+core_version_requirement: ^11
+package: 'FlowDrop'
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_workflow
+  - flowdrop:flowdrop_pipeline
+  - flowdrop:flowdrop_job
+  - flowdrop:flowdrop_node_type

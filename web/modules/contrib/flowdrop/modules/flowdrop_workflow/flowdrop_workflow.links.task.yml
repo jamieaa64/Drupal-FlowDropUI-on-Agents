@@ -1,0 +1,11 @@
+entity.flowdrop_workflow.pipelines:
+  title: "Pipelines"
+  route_name: entity.flowdrop_workflow.pipelines
+  base_route: entity.flowdrop_workflow.canonical
+  weight: 5
+
+flowdrop_workflow.editor:
+  title: "Editor"
+  route_name: flowdrop_workflow.editor.workflow.entity
+  base_route: entity.flowdrop_workflow.canonical
+  weight: -5

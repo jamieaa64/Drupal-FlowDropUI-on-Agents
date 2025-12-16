@@ -1,0 +1,8 @@
+name: 'Tool - Content'
+type: module
+description: 'Provides tools for creating, editing and delete content entities and field data.'
+package: Tools
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - tool:tool
+  - drupal:serialization

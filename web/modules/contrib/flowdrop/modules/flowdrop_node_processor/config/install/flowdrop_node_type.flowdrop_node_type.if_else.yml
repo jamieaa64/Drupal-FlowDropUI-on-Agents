@@ -1,0 +1,21 @@
+id: if_else
+label: 'If/Else'
+description: 'Simple conditional logic with text input, match text, and operator'
+category: logic
+icon: 'mdi:code-braces'
+color: '#8b5cf6'
+version: '1.0.0'
+enabled: true
+config:
+  textInput: ''
+  matchText: ''
+  operator: 'equals'
+  caseSensitive: false
+tags:
+  - logic
+  - if
+  - else
+  - conditional
+  - text
+  - comparison
+executor_plugin: 'if_else'

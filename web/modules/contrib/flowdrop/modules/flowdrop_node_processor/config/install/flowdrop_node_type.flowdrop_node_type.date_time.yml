@@ -1,0 +1,17 @@
+id: date_time
+label: 'Date & Time'
+description: 'Handle date and time operations'
+category: tool
+icon: 'mdi:calendar-clock'
+color: '#84cc16'
+version: '1.0.0'
+enabled: true
+config:
+  format: 'YYYY-MM-DD'
+  timezone: 'UTC'
+tags:
+  - tools
+  - date
+  - time
+  - format
+executor_plugin: 'date_time'

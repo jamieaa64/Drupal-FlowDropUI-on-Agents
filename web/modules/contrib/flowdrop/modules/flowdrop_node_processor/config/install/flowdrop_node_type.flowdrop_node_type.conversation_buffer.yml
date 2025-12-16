@@ -1,0 +1,17 @@
+id: conversation_buffer
+label: 'Conversation Buffer'
+description: 'Store conversation history'
+category: memory
+icon: 'mdi:chat-history'
+color: '#8b5cf6'
+version: '1.0.0'
+enabled: true
+config:
+  maxTokens: 2000
+  returnMessages: true
+tags:
+  - memory
+  - conversation
+  - history
+  - buffer
+executor_plugin: 'conversation_buffer'

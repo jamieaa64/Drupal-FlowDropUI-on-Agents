@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - flowdrop_pipeline
+id: flowdrop_pipeline_delete_action
+label: 'Delete flowdrop pipelines'
+type: flowdrop_pipeline
+plugin: entity:delete_action:flowdrop_pipeline
+configuration: {  }

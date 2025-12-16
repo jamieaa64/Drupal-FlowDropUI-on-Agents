@@ -1,0 +1,16 @@
+id: huggingface_embeddings
+label: 'HuggingFace Embeddings'
+description: 'Generate embeddings using HuggingFace models'
+category: embedding
+icon: 'mdi:vector-square'
+color: '#f59e0b'
+version: '1.0.0'
+enabled: true
+config:
+  model: 'sentence-transformers/all-MiniLM-L6-v2'
+  apiToken: ''
+tags:
+  - embeddings
+  - huggingface
+  - vector
+executor_plugin: 'huggingface_embeddings'

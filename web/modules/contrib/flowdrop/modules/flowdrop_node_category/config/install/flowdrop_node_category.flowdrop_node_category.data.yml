@@ -1,0 +1,6 @@
+id: data
+label: 'Data'
+description: 'Node types for data storage, retrieval, and manipulation'
+icon: 'mdi:database'
+color: '#607D8B'
+enabled: true 

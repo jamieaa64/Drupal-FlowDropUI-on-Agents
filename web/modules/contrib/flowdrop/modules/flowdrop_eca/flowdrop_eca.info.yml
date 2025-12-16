@@ -1,0 +1,9 @@
+name: 'FlowDrop ECA Integration'
+type: module
+description: 'Provides ECA (Events, Conditions, Actions) integration for FlowDrop workflows.'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_type
+  - drupal:eca

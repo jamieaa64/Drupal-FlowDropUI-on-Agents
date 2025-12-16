@@ -1,0 +1,13 @@
+# FlowDrop Runtime Permissions
+
+# Access FlowDrop Runtime API
+access flowdrop runtime api:
+  title: 'Access FlowDrop Runtime API'
+  description: 'Allow users to access FlowDrop Runtime REST API endpoints for status monitoring and metrics.'
+  restrict access: TRUE
+
+# Administer FlowDrop Runtime
+administer flowdrop runtime:
+  title: 'Administer FlowDrop Runtime'
+  description: 'Allow users to administer FlowDrop Runtime settings, view system metrics, and manage executions.'
+  restrict access: TRUE

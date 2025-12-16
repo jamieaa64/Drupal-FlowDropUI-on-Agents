@@ -1,0 +1,8 @@
+name: 'FlowDrop AI'
+type: module
+description: 'FlowDrop Integration with AI'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - flowdrop:flowdrop
+  - flowdrop:flowdrop_node_type

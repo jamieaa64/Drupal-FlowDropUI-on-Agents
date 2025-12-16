@@ -1,0 +1,7 @@
+# Custom library for general purposes.
+editor:
+  js:
+    build/flowdrop/flowdrop.iife.js: {preprocess: false}
+  css:
+    component:
+      build/flowdrop/flowdrop.css: {}

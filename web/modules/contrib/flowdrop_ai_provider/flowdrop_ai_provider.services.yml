@@ -1,0 +1,4 @@
+services:
+  flowdrop_ai_provider.model_service:
+    class: Drupal\flowdrop_ai_provider\Service\AiModelService
+    arguments: ['@logger.factory', '@ai.provider']

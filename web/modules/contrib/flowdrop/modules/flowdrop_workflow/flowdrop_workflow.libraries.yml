@@ -1,0 +1,14 @@
+editor:
+  version: 1.x
+  css:
+    layout:
+      css/editor-layout.css : {}
+    component:
+      css/editor-component.css : {}
+  js:
+    js/workflow.editor.js: {preprocess: false}
+  dependencies:
+    - drupal/once
+    - core/drupal
+    - core/drupalSettings
+    - flowdrop_ui/editor

@@ -1,0 +1,6 @@
+id: memory
+label: 'Memory'
+description: 'Node types for conversation memory and context management'
+icon: 'mdi:brain'
+color: '#ec4899'
+enabled: true 

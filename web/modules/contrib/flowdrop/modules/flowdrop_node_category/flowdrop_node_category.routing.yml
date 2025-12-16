@@ -1,0 +1,31 @@
+entity.flowdrop_node_category.collection:
+  path: '/admin/structure/flowdrop-node-category'
+  defaults:
+    _entity_list: 'flowdrop_node_category'
+    _title: 'FlowDrop Node Category configuration'
+  requirements:
+    _permission: 'administer flowdrop_node_category'
+
+entity.flowdrop_node_category.add_form:
+  path: '/admin/structure/flowdrop_node_category/add'
+  defaults:
+    _entity_form: 'flowdrop_node_category.add'
+    _title: 'Add a flowdrop node category'
+  requirements:
+    _permission: 'administer flowdrop_node_category'
+
+entity.flowdrop_node_category.edit_form:
+  path: '/admin/structure/flowdrop-node-category/{flowdrop_node_category}'
+  defaults:
+    _entity_form: 'flowdrop_node_category.edit'
+    _title: 'Edit a flowdrop node category'
+  requirements:
+    _permission: 'administer flowdrop_node_category'
+
+entity.flowdrop_node_category.delete_form:
+  path: '/admin/structure/flowdrop-node-category/{flowdrop_node_category}/delete'
+  defaults:
+    _entity_form: 'flowdrop_node_category.delete'
+    _title: 'Delete a flowdrop node category'
+  requirements:
+    _permission: 'administer flowdrop_node_category'

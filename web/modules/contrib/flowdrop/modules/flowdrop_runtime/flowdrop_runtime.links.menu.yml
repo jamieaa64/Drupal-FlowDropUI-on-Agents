@@ -1,0 +1,8 @@
+# FlowDrop Runtime Menu Links
+
+flowdrop_runtime.pipeline_interaction:
+  title: 'Pipeline Interaction'
+  description: 'Execute and manage FlowDrop pipelines'
+  route_name: flowdrop_runtime.pipeline_interaction
+  parent: system.admin_structure
+  weight: 50

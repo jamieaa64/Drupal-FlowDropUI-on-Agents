@@ -1,0 +1,7 @@
+administer flowdrop configuration:
+  title: 'Administer FlowDrop configuration'
+
+administer flowdrop:
+  title: 'Administer FlowDrop'
+  description: 'Administer all FlowDrop configuration and entities'
+  restrict access: true

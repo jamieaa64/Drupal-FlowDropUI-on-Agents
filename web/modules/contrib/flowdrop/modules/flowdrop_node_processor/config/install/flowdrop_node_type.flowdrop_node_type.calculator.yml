@@ -1,0 +1,16 @@
+id: calculator
+label: 'Calculator'
+description: 'Perform mathematical calculations'
+category: tool
+icon: 'mdi:calculator'
+color: '#6366f1'
+version: '1.0.0'
+enabled: true
+config:
+  precision: 2
+tags:
+  - tools
+  - calculator
+  - math
+  - compute
+executor_plugin: 'calculator'

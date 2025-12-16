@@ -1,0 +1,6 @@
+id: model
+label: 'Model'
+description: 'Node types for AI and machine learning models'
+icon: 'mdi:robot'
+color: '#10a37f'
+enabled: true 

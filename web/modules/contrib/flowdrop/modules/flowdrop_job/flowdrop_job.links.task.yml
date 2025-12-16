@@ -1,0 +1,26 @@
+entity.flowdrop_job.view:
+  title: 'View'
+  route_name: entity.flowdrop_job.canonical
+  base_route: entity.flowdrop_job.canonical
+entity.flowdrop_job.edit_form:
+  title: 'Edit'
+  route_name: entity.flowdrop_job.edit_form
+  base_route: entity.flowdrop_job.canonical
+entity.flowdrop_job.delete_form:
+  title: 'Delete'
+  route_name: entity.flowdrop_job.delete_form
+  base_route: entity.flowdrop_job.canonical
+  weight: 10
+entity.flowdrop_job.collection:
+  title: 'FlowDrop Jobs'
+  route_name: entity.flowdrop_job.collection
+  base_route: system.admin_content
+  weight: 10
+entity.flowdrop_job_type.edit_form:
+  title: 'Edit'
+  route_name: entity.flowdrop_job_type.edit_form
+  base_route: entity.flowdrop_job_type.edit_form
+entity.flowdrop_job_type.collection:
+  title: 'List'
+  route_name: entity.flowdrop_job_type.collection
+  base_route: entity.flowdrop_job_type.collection

@@ -1,0 +1,9 @@
+services:
+  # AI-specific services
+  flowdrop_ai.model_service:
+    class: Drupal\flowdrop_ai\Service\AiModelService
+    arguments: ['@logger.factory']
+
+  flowdrop_ai.node_type:
+    class: Drupal\flowdrop_ai\Service\AiNodeTypeService
+    arguments: ['@logger.factory'] 

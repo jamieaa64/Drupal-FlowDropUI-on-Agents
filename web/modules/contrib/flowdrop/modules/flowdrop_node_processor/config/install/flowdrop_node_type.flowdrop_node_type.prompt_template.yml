@@ -1,0 +1,17 @@
+id: prompt_template
+label: 'Prompt Template'
+description: 'Create reusable prompt templates with variables'
+category: prompt
+icon: 'mdi:message-text'
+color: '#f59e0b'
+version: '1.0.0'
+enabled: true
+config:
+  template: 'You are a helpful assistant. {context}'
+  variables:
+    - context
+tags:
+  - prompt
+  - template
+  - variable
+executor_plugin: 'prompt_template'

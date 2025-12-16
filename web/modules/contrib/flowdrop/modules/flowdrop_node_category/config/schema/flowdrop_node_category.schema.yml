@@ -1,0 +1,20 @@
+flowdrop_node_category.flowdrop_node_category.*:
+  type: config_entity
+  label: FlowDrop Node Category
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string
+    icon:
+      type: string
+      label: 'Icon'
+    color:
+      type: string
+      label: 'Color'

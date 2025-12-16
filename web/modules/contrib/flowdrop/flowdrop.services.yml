@@ -1,0 +1,4 @@
+services:
+  flowdrop.node_processor_plugin_manager:
+    class: Drupal\flowdrop\Service\FlowDropNodeProcessorPluginManager
+    arguments: ['@container.namespaces', '@cache.default', '@module_handler']

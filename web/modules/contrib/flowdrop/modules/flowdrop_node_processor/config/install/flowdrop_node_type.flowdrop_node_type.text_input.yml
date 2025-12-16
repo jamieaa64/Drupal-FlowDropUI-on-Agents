@@ -1,0 +1,17 @@
+id: text_input
+label: 'Text Input'
+description: 'Simple text input for user data'
+category: input
+icon: 'mdi:text'
+color: '#22c55e'
+version: '1.0.0'
+enabled: true
+config:
+  placeholder: 'Enter text here...'
+  defaultValue: ''
+  multiline: false
+tags:
+  - input
+  - text
+  - user-input
+executor_plugin: 'text_input'
