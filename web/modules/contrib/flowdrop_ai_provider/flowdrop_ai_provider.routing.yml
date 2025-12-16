@@ -1,0 +1,194 @@
+# FlowDrop AI Provider API Routes
+# These endpoints enable the FlowDrop UI to save/load AI Agent configurations
+
+# ============================================================================
+# AGENT CRUD ENDPOINTS
+# ============================================================================
+
+flowdrop_ai_provider.api.agents.list:
+  path: '/api/flowdrop-ai/agents'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::getAgents'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.agents.create:
+  path: '/api/flowdrop-ai/agents'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::createAgent'
+  methods: [POST]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.agents.get:
+  path: '/api/flowdrop-ai/agents/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::getAgent'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+flowdrop_ai_provider.api.agents.update:
+  path: '/api/flowdrop-ai/agents/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::updateAgent'
+  methods: [PUT]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+flowdrop_ai_provider.api.agents.delete:
+  path: '/api/flowdrop-ai/agents/{id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::deleteAgent'
+  methods: [DELETE]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+flowdrop_ai_provider.api.agents.validate:
+  path: '/api/flowdrop-ai/agents/validate'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::validateAgent'
+  methods: [POST]
+  requirements:
+    _permission: 'administer ai_agent'
+
+# ============================================================================
+# WORKFLOW CONVERSION ENDPOINTS
+# These are the main endpoints for FlowDrop UI save/load operations
+# ============================================================================
+
+flowdrop_ai_provider.api.workflow.save:
+  path: '/api/flowdrop-ai/workflow/save'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::saveWorkflow'
+  methods: [POST]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.workflow.load:
+  path: '/api/flowdrop-ai/workflow/load'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::loadWorkflow'
+  methods: [GET, POST]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.workflow.validate:
+  path: '/api/flowdrop-ai/workflow/validate'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::validateWorkflow'
+  methods: [POST]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.agents.as_workflow:
+  path: '/api/flowdrop-ai/agents/{id}/workflow'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::getAgentAsWorkflow'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+# ============================================================================
+# UI POSITION STORAGE ENDPOINTS
+# Store/load node positions for FlowDrop canvas
+# ============================================================================
+
+flowdrop_ai_provider.api.agents.positions.store:
+  path: '/api/flowdrop-ai/agents/{id}/positions'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::storePositions'
+  methods: [PUT, POST]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+flowdrop_ai_provider.api.agents.positions.load:
+  path: '/api/flowdrop-ai/agents/{id}/positions'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\AgentsController::loadPositions'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+    id: '[a-z0-9_]+'
+
+# ============================================================================
+# TOOL DISCOVERY ENDPOINTS
+# ============================================================================
+
+flowdrop_ai_provider.api.tools.list:
+  path: '/api/flowdrop-ai/tools'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getTools'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.tools.by_category:
+  path: '/api/flowdrop-ai/tools/by-category'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getToolsByCategory'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.tools.search:
+  path: '/api/flowdrop-ai/tools/search'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::searchTools'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.tools.get:
+  path: '/api/flowdrop-ai/tools/{toolId}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getTool'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+    toolId: '.+'
+
+flowdrop_ai_provider.api.tools.schema:
+  path: '/api/flowdrop-ai/tools/{toolId}/schema'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getToolSchema'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+    toolId: '.+'
+
+flowdrop_ai_provider.api.tools.validate:
+  path: '/api/flowdrop-ai/tools/{toolId}/validate'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::validateToolConfig'
+  methods: [POST]
+  requirements:
+    _permission: 'administer ai_agent'
+    toolId: '.+'
+
+# ============================================================================
+# AGENT AS SUB-AGENT ENDPOINTS
+# For orchestration/triage agent configuration
+# ============================================================================
+
+flowdrop_ai_provider.api.available_agents:
+  path: '/api/flowdrop-ai/available-agents'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getAvailableAgents'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.api.agent_schema:
+  path: '/api/flowdrop-ai/schema/agent'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\Api\ToolsController::getAgentSchema'
+  methods: [GET]
+  requirements:
+    _permission: 'administer ai_agent'

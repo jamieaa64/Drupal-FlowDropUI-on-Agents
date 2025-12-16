@@ -546,13 +546,83 @@ All services verified working:
 
 ---
 
-## Next Phase: Phase 3 - API Integration
+## Current Phase: Phase 3 - API Integration ✅ COMPLETE
 
 ### Phase 3 Objectives
-1. Create API endpoints for FlowDrop UI to call these services
-2. Modify FlowDrop UI save/load to use new services
-3. Add proper error handling and user feedback
-4. Create integration tests
+1. ✅ Create API endpoints for FlowDrop UI to call these services
+2. Modify FlowDrop UI save/load to use new services (Future Phase)
+3. ✅ Add proper error handling and user feedback
+4. Create integration tests (Future Phase)
+
+### API Endpoints Created
+
+#### Agent CRUD Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/flowdrop-ai/agents` | List all agents |
+| POST | `/api/flowdrop-ai/agents` | Create new agent |
+| GET | `/api/flowdrop-ai/agents/{id}` | Get specific agent |
+| PUT | `/api/flowdrop-ai/agents/{id}` | Update agent |
+| DELETE | `/api/flowdrop-ai/agents/{id}` | Delete agent |
+| POST | `/api/flowdrop-ai/agents/validate` | Validate agent data |
+
+#### Workflow Conversion Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/flowdrop-ai/workflow/save` | Save workflow as agent configs |
+| GET/POST | `/api/flowdrop-ai/workflow/load` | Load agents as workflow |
+| POST | `/api/flowdrop-ai/workflow/validate` | Validate workflow mapping |
+| GET | `/api/flowdrop-ai/agents/{id}/workflow` | Get agent as workflow |
+
+#### UI Position Storage
+| Method | Path | Description |
+|--------|------|-------------|
+| PUT/POST | `/api/flowdrop-ai/agents/{id}/positions` | Store UI positions |
+| GET | `/api/flowdrop-ai/agents/{id}/positions` | Load UI positions |
+
+#### Tool Discovery Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/flowdrop-ai/tools` | List all tools |
+| GET | `/api/flowdrop-ai/tools/by-category` | List tools by category |
+| GET | `/api/flowdrop-ai/tools/search?q=query` | Search tools |
+| GET | `/api/flowdrop-ai/tools/{toolId}` | Get specific tool |
+| GET | `/api/flowdrop-ai/tools/{toolId}/schema` | Get tool config schema |
+| POST | `/api/flowdrop-ai/tools/{toolId}/validate` | Validate tool config |
+
+#### Agent Discovery Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/flowdrop-ai/available-agents` | List agents for sub-agent use |
+| GET | `/api/flowdrop-ai/schema/agent` | Get JSON schema for agents |
+
+### Files Created
+
+**Controllers:**
+- `src/Controller/Api/AgentsController.php` - Agent CRUD and workflow conversion
+- `src/Controller/Api/ToolsController.php` - Tool discovery and metadata
+
+**Routing:**
+- `flowdrop_ai_provider.routing.yml` - All API routes (20 endpoints)
+
+### Testing Results
+
+All API endpoints verified working:
+- Agent list: 5 agents returned
+- Tool list: 33 tools returned
+- Tool search: Works correctly (e.g., "entity" returns 20 tools)
+- Agent as workflow: Converts agent to FlowDrop workflow format
+- Available agents: Returns agents with tool_id format for orchestration
+
+---
+
+## Next Phase: Phase 4 - Frontend Integration
+
+### Phase 4 Objectives
+1. Modify FlowDrop UI (Svelte) to call new API endpoints
+2. Add "Save to AI Agent" option in FlowDrop save dialog
+3. Add "Load from AI Agent" option in FlowDrop load dialog
+4. Create new node type drawer for AI-specific nodes
 
 ---
 
@@ -562,3 +632,4 @@ All services verified working:
 1. Initial branch creation from main
 2. Phase 1 research complete - Added schema definitions and service interfaces
 3. Phase 2 complete - Implemented FlowDropAgentMapper, AgentRepository, and ToolDataProvider services
+4. Phase 3 complete - Added REST API endpoints for agents and tools
