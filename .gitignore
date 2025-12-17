@@ -9,7 +9,10 @@
 
 # Ignore most contrib modules (managed by Composer)
 /web/modules/contrib/
-# But track these contrib modules we're modifying for patches:
+# Track these contrib modules for reference/patches:
+# NOTE: Only flowdrop_ai_provider has local modifications (exploratory work).
+# Those changes are superseded by web/modules/custom/flowdrop_ui_agents.
+# flowdrop_ai_provider will be removed once flowdrop_ui_agents is complete.
 !/web/modules/contrib/ai/
 !/web/modules/contrib/ai_agents/
 !/web/modules/contrib/ai_assistant_api/

@@ -1,0 +1,39 @@
+uuid: c797b662-8f74-41f4-af52-9b22c307c0f2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.foodstuff.body
+    - field.field.node.foodstuff.field_type_of_food
+    - node.type.foodstuff
+  module:
+    - text
+    - user
+id: node.foodstuff.default
+targetEntityType: node
+bundle: foodstuff
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_type_of_food:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

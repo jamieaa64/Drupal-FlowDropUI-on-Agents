@@ -116,11 +116,13 @@ interface FlowDropAgentMapperInterface {
    *   The ID of the parent agent node.
    * @param array $positions
    *   Optional array of saved positions for tools.
+   * @param array $toolSettings
+   *   Optional per-tool settings from the agent (return_directly, require_usage, etc.).
    *
    * @return array
    *   Array of WorkflowNodeDTO objects for tool nodes.
    */
-  public function toolsToToolNodes(array $tools, string $parentAgentNodeId, array $positions = []): array;
+  public function toolsToToolNodes(array $tools, string $parentAgentNodeId, array $positions = [], array $toolSettings = []): array;
 
   /**
    * Stores UI positions for an agent in third-party settings.

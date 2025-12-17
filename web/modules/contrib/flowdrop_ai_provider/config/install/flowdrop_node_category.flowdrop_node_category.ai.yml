@@ -1,6 +1,0 @@
-id: ai
-label: 'AI & ML'
-description: 'Node types for artificial intelligence and machine learning operations'
-icon: 'mdi:brain'
-color: '#9C27B0'
-enabled: true 

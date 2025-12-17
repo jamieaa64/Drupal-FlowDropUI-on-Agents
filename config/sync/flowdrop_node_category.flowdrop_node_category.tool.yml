@@ -1,0 +1,12 @@
+uuid: 34694056-b1d1-42f7-be61-b7eb1c3a266c
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: s_0MWI356wSuSztomW-hyih9m4izDXenHJjnlEs1Dsg
+id: tool
+label: Tool
+description: 'Node types for utility tools and helper functions'
+icon: 'mdi:wrench'
+color: '#6366f1'
+enabled: true

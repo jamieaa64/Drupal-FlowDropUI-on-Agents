@@ -1,0 +1,11 @@
+uuid: 0f2c3df5-616b-4b58-86ce-6668e3e5df1f
+langcode: en
+status: true
+dependencies:
+  module:
+    - ai_agents_explorer
+id: ai_agent_decision.token
+label: Token
+description: null
+targetEntityType: ai_agent_decision
+cache: true

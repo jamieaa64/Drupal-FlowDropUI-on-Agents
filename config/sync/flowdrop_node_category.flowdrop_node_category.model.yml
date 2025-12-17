@@ -1,0 +1,12 @@
+uuid: 4dac4173-b7a2-4bf6-bae9-b75e8224bd71
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: XqHsaH4c2UvY0_o9tycXr3RnWRTMRKPhEiByyHDB-b8
+id: model
+label: Model
+description: 'Node types for AI and machine learning models'
+icon: 'mdi:robot'
+color: '#10a37f'
+enabled: true

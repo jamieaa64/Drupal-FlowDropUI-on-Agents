@@ -1,0 +1,9 @@
+name: 'FlowDrop UI Agents'
+type: module
+description: 'Provides FlowDrop visual editor integration for AI Agents using Modeler API.'
+package: FlowDrop
+core_version_requirement: ^11
+dependencies:
+  - drupal:ai_agents
+  - drupal:modeler_api
+  - flowdrop:flowdrop_ui

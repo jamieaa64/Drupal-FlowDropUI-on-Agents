@@ -1,0 +1,12 @@
+uuid: 91719188-d9d2-4203-abe1-f63d1286a1bd
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: R4H6M_cH-fwu4SvNayuYePcJ9g0IOB44-nf2BPkCfPU
+id: prompt
+label: Prompt
+description: 'Node types for prompt engineering and template management'
+icon: 'mdi:format-quote-close'
+color: '#f59e0b'
+enabled: true

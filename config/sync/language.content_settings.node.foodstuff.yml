@@ -1,0 +1,11 @@
+uuid: be55d05e-fc59-472f-9576-95b92e5e37be
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.foodstuff
+id: node.foodstuff
+target_entity_type_id: node
+target_bundle: foodstuff
+default_langcode: site_default
+language_alterable: false

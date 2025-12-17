@@ -1,0 +1,12 @@
+uuid: 0ffe265c-6b1d-44c5-b7c3-83ce4c2f5a54
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: x_05341zlCPKTI3D0ybvxeh557c8FP46BOdSaqwdQkE
+id: logic
+label: Logic
+description: 'Node types for conditional logic and control flow'
+icon: 'mdi:git-branch'
+color: '#06b6d4'
+enabled: true

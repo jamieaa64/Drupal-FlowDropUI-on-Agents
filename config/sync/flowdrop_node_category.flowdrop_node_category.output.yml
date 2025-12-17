@@ -1,0 +1,12 @@
+uuid: bc8e6427-3486-41de-a1b8-8794635dec53
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ATf21Vrl2RQCBHr49aSmm44WO4YNNq6SFguVNZLYgmY
+id: output
+label: Output
+description: 'Node types that produce output data from workflows'
+icon: 'mdi:output'
+color: '#FF5722'
+enabled: true

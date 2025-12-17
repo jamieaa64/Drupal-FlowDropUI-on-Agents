@@ -1,0 +1,12 @@
+services:
+  flowdrop_ui_agents.agent_workflow_mapper:
+    class: Drupal\flowdrop_ui_agents\Service\AgentWorkflowMapper
+    arguments:
+      - '@entity_type.manager'
+      - '@plugin.manager.ai.function_calls'
+      - '@logger.factory'
+
+  flowdrop_ui_agents.workflow_parser:
+    class: Drupal\flowdrop_ui_agents\Service\WorkflowParser
+    arguments:
+      - '@logger.factory'
