@@ -775,27 +775,22 @@ final class AgentsController extends ControllerBase {
   /**
    * Converts a WorkflowDTO to array format for JSON response.
    *
+   * Uses getRawData() to preserve FlowDrop frontend-compatible format.
+   *
    * @param \Drupal\flowdrop_workflow\DTO\WorkflowDTO $workflow
    *   The workflow DTO.
    *
    * @return array
-   *   The workflow as an array.
+   *   The workflow as an array in FlowDrop frontend format.
    */
   protected function workflowToArray(WorkflowDTO $workflow): array {
+    // Get nodes in frontend format using getRawData().
     $nodes = [];
     foreach ($workflow->getNodes() as $node) {
-      $nodes[] = [
-        'id' => $node->getId(),
-        'typeId' => $node->getTypeId(),
-        'label' => $node->getLabel(),
-        'config' => $node->getConfig(),
-        'metadata' => $node->getMetadata(),
-        'position' => $node->getPosition(),
-        'inputs' => $node->getInputs(),
-        'outputs' => $node->getOutputs(),
-      ];
+      $nodes[] = $node->getRawData();
     }
 
+    // Get edges in frontend format.
     $edges = [];
     foreach ($workflow->getEdges() as $edge) {
       $edges[] = [

@@ -55,6 +55,9 @@ class ToolDataProvider implements ToolDataProviderInterface {
       }
 
       // Build FlowDrop-compatible node format.
+      // Get base tool settings schema plus any plugin-specific config.
+      $configSchema = $this->getToolSettingsSchema($pluginId);
+
       $toolInfo = [
         'id' => $pluginId,
         'name' => $label,
@@ -89,7 +92,7 @@ class ToolDataProvider implements ToolDataProviderInterface {
           ],
         ],
         'config' => [],
-        'configSchema' => [],
+        'configSchema' => $configSchema,
       ];
 
       // Add full details in 'full' view mode.
@@ -436,7 +439,7 @@ class ToolDataProvider implements ToolDataProviderInterface {
           ],
         ],
         'config' => [],
-        'configSchema' => [],
+        'configSchema' => $this->getAgentConfigSchema(),
       ];
 
       if ($viewMode === 'full') {
@@ -523,6 +526,128 @@ class ToolDataProvider implements ToolDataProviderInterface {
           'type' => 'string',
           'description' => 'JSON schema for structured output',
         ],
+      ],
+    ];
+  }
+
+  /**
+   * Gets the tool settings schema including per-tool settings.
+   *
+   * This includes the standard AI Agent tool settings (return_directly,
+   * require_usage, etc.) plus any plugin-specific configuration.
+   *
+   * @param string $toolId
+   *   The tool plugin ID.
+   *
+   * @return array
+   *   The config schema for FlowDrop config panel.
+   */
+  protected function getToolSettingsSchema(string $toolId): array {
+    // Start with base tool settings that apply to all tools.
+    $schema = [
+      [
+        'config_id' => 'tool_id',
+        'name' => 'Tool ID',
+        'description' => 'The tool plugin ID (read-only)',
+        'value_type' => 'string',
+        'required' => TRUE,
+        'default' => $toolId,
+      ],
+      [
+        'config_id' => 'return_directly',
+        'name' => 'Return Directly',
+        'description' => 'Return tool result directly without LLM rewriting. Use for API responses or structured output.',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'require_usage',
+        'name' => 'Require Usage',
+        'description' => 'Remind the agent if it tries to output without using this tool first.',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'use_artifacts',
+        'name' => 'Use Artifact Storage',
+        'description' => 'Store large responses in artifacts instead of sending to AI. Reference with {{artifact:tool_name:index}}',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'description_override',
+        'name' => 'Override Tool Description',
+        'description' => 'Custom description sent to LLM instead of default. Leave empty to use default.',
+        'value_type' => 'text',
+        'default' => '',
+      ],
+      [
+        'config_id' => 'progress_message',
+        'name' => 'Progress Message',
+        'description' => 'Message shown in UI while tool is executing.',
+        'value_type' => 'string',
+        'default' => '',
+      ],
+    ];
+
+    // Add any tool-specific configuration from the plugin.
+    $pluginSchema = $this->getToolConfigSchema($toolId);
+    if (!empty($pluginSchema)) {
+      $schema = array_merge($schema, $pluginSchema);
+    }
+
+    return $schema;
+  }
+
+  /**
+   * Gets the configuration schema for agent nodes.
+   *
+   * @return array
+   *   The config schema for FlowDrop config panel.
+   */
+  protected function getAgentConfigSchema(): array {
+    return [
+      [
+        'config_id' => 'label',
+        'name' => 'Label',
+        'description' => 'Human-readable name for the agent',
+        'value_type' => 'string',
+        'required' => TRUE,
+      ],
+      [
+        'config_id' => 'description',
+        'name' => 'Description',
+        'description' => 'Description used by triage agents to select this agent',
+        'value_type' => 'string',
+        'required' => TRUE,
+      ],
+      [
+        'config_id' => 'systemPrompt',
+        'name' => 'System Prompt',
+        'description' => 'Core instructions for agent behavior',
+        'value_type' => 'text',
+        'required' => TRUE,
+      ],
+      [
+        'config_id' => 'maxLoops',
+        'name' => 'Max Loops',
+        'description' => 'Maximum iterations before stopping (1-100)',
+        'value_type' => 'integer',
+        'default' => 3,
+      ],
+      [
+        'config_id' => 'orchestrationAgent',
+        'name' => 'Orchestration Agent',
+        'description' => 'If true, agent only picks other agents for work (cannot do its own tasks)',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'triageAgent',
+        'name' => 'Triage Agent',
+        'description' => 'If true, agent can pick other agents AND do its own work',
+        'value_type' => 'boolean',
+        'default' => FALSE,
       ],
     ];
   }

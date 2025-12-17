@@ -59,11 +59,14 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
    *   The typed data manager.
    * @param \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
    *   The normalizer.
+   * @param \Drupal\flowdrop_ai_provider\Services\ToolDataProviderInterface|null $toolDataProvider
+   *   The tool data provider (optional for backwards compatibility).
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected TypedDataManagerInterface $typedDataManager,
     protected NormalizerInterface $normalizer,
+    protected ?ToolDataProviderInterface $toolDataProvider = NULL,
   ) {}
 
   /**
@@ -251,12 +254,24 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
       $nodeData['position'] = $position;
       $nodes[$nodeId] = WorkflowNodeDTO::fromArray($nodeData);
 
-      // Convert tools to tool nodes.
+      // Convert tools to tool nodes with their settings from the agent.
       $enabledTools = array_keys(array_filter($agent->get('tools') ?? []));
-      $toolNodes = $this->toolsToToolNodes($enabledTools, $nodeId, $savedPositions);
+      $toolSettings = $agent->get('tool_settings') ?? [];
+      $toolNodes = $this->toolsToToolNodes($enabledTools, $nodeId, $savedPositions, $toolSettings);
 
       foreach ($toolNodes as $toolNode) {
         $nodes[$toolNode->getId()] = $toolNode;
+
+        // Create edge from agent's tools port to tool's tool port.
+        $edgeId = 'edge_' . $nodeId . '_to_' . $toolNode->getId();
+        $edgeData = [
+          'id' => $edgeId,
+          'source' => $nodeId,
+          'target' => $toolNode->getId(),
+          'sourceHandle' => $nodeId . '-output-tools',
+          'targetHandle' => $toolNode->getId() . '-input-tool',
+        ];
+        $edges[] = WorkflowEdgeDTO::fromArray($edgeData);
       }
 
       // Merge saved positions.
@@ -264,7 +279,8 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
     }
 
     // Build edges between agents if there's orchestration.
-    $edges = $this->buildAgentEdges($agents, $agentNodeIdMap);
+    $agentEdges = $this->buildAgentEdges($agents, $agentNodeIdMap);
+    $edges = array_merge($edges, $agentEdges);
 
     // Create workflow DTO.
     $firstAgentId = reset($agentIds);
@@ -289,11 +305,14 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
   public function agentConfigToNode(AiAgent $agent): WorkflowNodeDTO {
     $agentId = $agent->id();
 
+    $nodeId = 'agent_' . $agentId;
+
     // Build node in FlowDrop frontend format.
     $nodeData = [
-      'id' => 'agent_' . $agentId,
+      'id' => $nodeId,
       'type' => 'universalNode',
       'data' => [
+        'nodeId' => $nodeId,
         'label' => $agent->label(),
         'config' => [
           'description' => $agent->get('description'),
@@ -346,7 +365,16 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
               'required' => FALSE,
               'description' => 'Agent response',
             ],
+            [
+              'id' => 'tools',
+              'name' => 'Tools',
+              'type' => 'output',
+              'dataType' => 'tool',
+              'required' => FALSE,
+              'description' => 'Tools available to this agent',
+            ],
           ],
+          'configSchema' => $this->getAgentConfigSchema(),
         ],
       ],
       'position' => ['x' => 300, 'y' => 100],
@@ -356,9 +384,157 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
   }
 
   /**
+   * Gets the configuration schema for agent nodes.
+   *
+   * @return array
+   *   The config schema for FlowDrop config panel.
+   */
+  protected function getAgentConfigSchema(): array {
+    // Return JSON Schema format with properties object for FlowDrop config panel.
+    return [
+      'type' => 'object',
+      'properties' => [
+        'label' => [
+          'type' => 'string',
+          'title' => 'Label',
+          'description' => 'Human-readable name for the agent',
+        ],
+        'description' => [
+          'type' => 'string',
+          'title' => 'Description',
+          'description' => 'Description used by triage agents to select this agent',
+        ],
+        'systemPrompt' => [
+          'type' => 'string',
+          'format' => 'textarea',
+          'title' => 'System Prompt',
+          'description' => 'Core instructions for agent behavior',
+        ],
+        'maxLoops' => [
+          'type' => 'integer',
+          'title' => 'Max Loops',
+          'description' => 'Maximum iterations before stopping (1-100)',
+          'default' => 3,
+        ],
+        'orchestrationAgent' => [
+          'type' => 'boolean',
+          'title' => 'Orchestration Agent',
+          'description' => 'If true, agent only picks other agents for work (cannot do its own tasks)',
+          'default' => FALSE,
+        ],
+        'triageAgent' => [
+          'type' => 'boolean',
+          'title' => 'Triage Agent',
+          'description' => 'If true, agent can pick other agents AND do its own work',
+          'default' => FALSE,
+        ],
+      ],
+      'required' => ['label', 'description', 'systemPrompt'],
+    ];
+  }
+
+  /**
+   * Gets the configuration schema for a tool node.
+   *
+   * This includes per-tool settings like return_directly, require_usage, etc.
+   *
+   * @param string $toolId
+   *   The tool ID.
+   *
+   * @return array
+   *   The config schema for FlowDrop config panel.
+   */
+  protected function getToolConfigSchema(string $toolId): array {
+    // Return JSON Schema format with properties object for FlowDrop config panel.
+    $properties = [
+      'tool_id' => [
+        'type' => 'string',
+        'title' => 'Tool ID',
+        'description' => 'The tool plugin ID (read-only)',
+        'default' => $toolId,
+        'format' => 'hidden',
+      ],
+      'return_directly' => [
+        'type' => 'boolean',
+        'title' => 'Return Directly',
+        'description' => 'Return tool result directly without LLM rewriting. Use for API responses or structured output.',
+        'default' => FALSE,
+      ],
+      'require_usage' => [
+        'type' => 'boolean',
+        'title' => 'Require Usage',
+        'description' => 'Remind the agent if it tries to output without using this tool first.',
+        'default' => FALSE,
+      ],
+      'use_artifacts' => [
+        'type' => 'boolean',
+        'title' => 'Use Artifact Storage',
+        'description' => 'Store large responses in artifacts instead of sending to AI. Reference with {{artifact:tool_name:index}}',
+        'default' => FALSE,
+      ],
+      'description_override' => [
+        'type' => 'string',
+        'format' => 'textarea',
+        'title' => 'Override Tool Description',
+        'description' => 'Custom description sent to LLM instead of default. Leave empty to use default.',
+        'default' => '',
+      ],
+      'progress_message' => [
+        'type' => 'string',
+        'title' => 'Progress Message',
+        'description' => 'Message shown in UI while tool is executing.',
+        'default' => '',
+      ],
+    ];
+
+    // Add any tool-specific configuration from the plugin (convert to JSON Schema format).
+    if ($this->toolDataProvider) {
+      $pluginSchema = $this->toolDataProvider->getToolConfigSchema($toolId);
+      if (!empty($pluginSchema)) {
+        // Convert array format to JSON Schema properties format if needed.
+        foreach ($pluginSchema as $field) {
+          if (isset($field['config_id'])) {
+            $properties[$field['config_id']] = [
+              'type' => $this->mapValueTypeToJsonSchema($field['value_type'] ?? 'string'),
+              'title' => $field['name'] ?? $field['config_id'],
+              'description' => $field['description'] ?? '',
+              'default' => $field['default'] ?? NULL,
+            ];
+          }
+        }
+      }
+    }
+
+    return [
+      'type' => 'object',
+      'properties' => $properties,
+      'required' => ['tool_id'],
+    ];
+  }
+
+  /**
+   * Maps our value_type to JSON Schema type.
+   *
+   * @param string $valueType
+   *   The value type (string, text, boolean, integer, etc.).
+   *
+   * @return string
+   *   The JSON Schema type.
+   */
+  protected function mapValueTypeToJsonSchema(string $valueType): string {
+    return match ($valueType) {
+      'boolean' => 'boolean',
+      'integer', 'int' => 'integer',
+      'number', 'float' => 'number',
+      'text', 'textarea' => 'string',
+      default => 'string',
+    };
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function toolsToToolNodes(array $tools, string $parentAgentNodeId, array $positions = []): array {
+  public function toolsToToolNodes(array $tools, string $parentAgentNodeId, array $positions = [], array $toolSettings = []): array {
     $nodes = [];
     $toolYOffset = 0;
 
@@ -383,15 +559,27 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
       $toolLabel = end($toolParts);
       $toolLabel = ucwords(str_replace(['_', '-'], ' ', $toolLabel));
 
+      // Get per-tool settings from the agent config.
+      $settings = $toolSettings[$toolId] ?? [];
+
+      // Build config with tool settings.
+      $config = [
+        'tool_id' => $toolId,
+        'return_directly' => (bool) ($settings['return_directly'] ?? FALSE),
+        'require_usage' => (bool) ($settings['require_usage'] ?? FALSE),
+        'use_artifacts' => (bool) ($settings['use_artifacts'] ?? FALSE),
+        'description_override' => $settings['description_override'] ?? '',
+        'progress_message' => $settings['progress_message'] ?? '',
+      ];
+
       // Build node in FlowDrop frontend format.
       $nodeData = [
         'id' => $nodeId,
         'type' => 'universalNode',
         'data' => [
+          'nodeId' => $nodeId,
           'label' => $toolLabel,
-          'config' => [
-            'tool_id' => $toolId,
-          ],
+          'config' => $config,
           'metadata' => [
             'id' => $toolId,
             'name' => $toolLabel,
@@ -405,24 +593,25 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
             'color' => 'var(--color-ref-orange-500)',
             'inputs' => [
               [
-                'id' => 'trigger',
-                'name' => 'Trigger',
+                'id' => 'tool',
+                'name' => 'Tool',
                 'type' => 'input',
-                'dataType' => 'trigger',
+                'dataType' => 'tool',
                 'required' => FALSE,
-                'description' => 'Trigger input',
+                'description' => 'Tool connection from agent',
               ],
             ],
             'outputs' => [
               [
-                'id' => 'result',
-                'name' => 'Result',
+                'id' => 'tool',
+                'name' => 'Tool',
                 'type' => 'output',
-                'dataType' => 'mixed',
+                'dataType' => 'tool',
                 'required' => FALSE,
-                'description' => 'Tool result',
+                'description' => 'Tool output',
               ],
             ],
+            'configSchema' => $this->getToolConfigSchema($toolId),
           ],
         ],
         'position' => $position,

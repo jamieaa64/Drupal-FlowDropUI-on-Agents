@@ -10,6 +10,7 @@ services:
       - '@entity_type.manager'
       - '@typed_data_manager'
       - '@serializer'
+      - '@flowdrop_ai_provider.tool_data_provider'
 
   # Agent Repository - CRUD operations for AI Agent entities
   flowdrop_ai_provider.agent_repository:
