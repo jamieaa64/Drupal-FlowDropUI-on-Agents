@@ -107,13 +107,14 @@ class AgentWorkflowMapper {
       if ($toolNode) {
         $nodes[] = $toolNode;
 
-        // Create edge from tool to agent (tool provides capability to agent).
+        // Create edge from agent to tool (agent connects to tool).
+        // FlowDrop expects: source=agent, target=tool, sourceHandle={agent}-output-tools, targetHandle={tool}-input-tool
         $edges[] = [
-          'id' => "edge_{$toolNodeId}_to_{$agentNodeId}",
-          'source' => $toolNodeId,
-          'target' => $agentNodeId,
-          'sourceHandle' => "{$toolNodeId}-output-capability",
-          'targetHandle' => "{$agentNodeId}-input-tools",
+          'id' => "edge_{$agentNodeId}_to_{$toolNodeId}",
+          'source' => $agentNodeId,
+          'target' => $toolNodeId,
+          'sourceHandle' => "{$agentNodeId}-output-tools",
+          'targetHandle' => "{$toolNodeId}-input-tool",
           'type' => 'default',
           'data' => [
             'dataType' => 'tool',
