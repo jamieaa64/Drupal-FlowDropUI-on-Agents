@@ -187,114 +187,207 @@ settings:
 
 ## 5. Implementation Phases
 
-### Phase 1: Foundation
-- [ ] Study Modeler API integration pattern in depth
-- [ ] Study ECA Integration implementation in depth
-- [ ] Map FlowDrop's current save/load mechanism
-- [ ] Design the ConfigMapper service interface
-- [ ] Create schema definitions for Assistant/Agent
+### Phase 1: Foundation ✅ COMPLETE
+- [x] Study Modeler API integration pattern in depth
+- [x] Study ECA Integration implementation in depth
+- [x] Map FlowDrop's current save/load mechanism
+- [x] Design the ConfigMapper service interface
+- [x] Create schema definitions for Assistant/Agent
 
-### Phase 2: Save Flow
-- [ ] Create AssistantRepository service
-- [ ] Create AgentRepository service
-- [ ] Implement FlowDrop → Config transformation
-- [ ] Modify FlowDrop UI save action to use new services
-- [ ] Test: Create flow in UI, verify config entities created
+**Notes:**
+- Decided to work directly with AI Agent entities, not Assistants
+- Created `FlowDropAgentMapper` service with `FlowDropAgentMapperInterface`
+- Created `FlowDropAgentModel` TypedData definition
+- Studied ECA Integration's `ModelMapper` pattern extensively
 
-### Phase 3: Load Flow
-- [ ] Implement Config → FlowDrop transformation (reverse)
-- [ ] Create "Open existing" UI in FlowDrop
-- [ ] Load Assistant config and render on canvas
-- [ ] Load associated Agents as nodes
-- [ ] Load Tool references as attached nodes
-- [ ] Test: Open config-created agent in FlowDrop UI
+### Phase 2: Save Flow ✅ COMPLETE (Merged with mapping services)
+- [x] Create AssistantRepository service → **Changed: Using AI Agent directly**
+- [x] Create AgentRepository service → **Changed: FlowDropAgentMapper handles this**
+- [x] Implement FlowDrop → Config transformation (`workflowToAgentConfigs()`)
+- [x] Modify FlowDrop UI save action to use new services
+- [x] Test: Create flow in UI, verify config entities created
 
-### Phase 4: Tool Drawer
-- [ ] Query Tool module for available tools
-- [ ] Populate drawer with Tool plugins
-- [ ] Remove non-config-mappable nodes from drawer
-- [ ] Implement Tool attachment to Agent nodes
-- [ ] Test: Attach tools, save, verify in config
+**Notes:**
+- No separate repository services - `FlowDropAgentMapper` handles bidirectional conversion
+- Save endpoint: `POST /api/flowdrop-ai/workflow/save`
+- Tools stored as `ai_agent:TOOL_ID` format in agent's tools array
 
-### Phase 5: Edit & Update
-- [ ] Implement update flow (modify existing configs)
-- [ ] Handle config conflicts/validation
-- [ ] Test: Edit existing agent, save changes
+### Phase 3: Load Flow ✅ COMPLETE (Part of API endpoints)
+- [x] Implement Config → FlowDrop transformation (`agentConfigsToWorkflow()`)
+- [x] Create "Open existing" UI in FlowDrop (`AgentEditorController`)
+- [x] Load Assistant config and render on canvas → **Changed: Load Agent config**
+- [x] Load associated Agents as nodes → **Changed: Single agent = single node**
+- [x] Load Tool references as attached nodes
+- [x] Test: Open config-created agent in FlowDrop UI
 
-### Phase 6: Multi-Agent Flows
+**Notes:**
+- API endpoint: `GET /api/flowdrop-ai/agents/{id}/workflow`
+- Edit page: `/admin/config/ai/flowdrop-ai/agents/{id}/edit`
+- Positions loaded from agent's third-party settings
+
+### Phase 4: Tool Drawer ✅ COMPLETE
+- [x] Query Tool module for available tools (`ToolDataProvider`)
+- [x] Populate drawer with Tool plugins (via API endpoints)
+- [x] Remove non-config-mappable nodes from drawer → **Changed: Drawer shows tools only**
+- [x] Implement Tool attachment to Agent nodes
+- [x] Test: Attach tools, save, verify in config
+
+**Notes:**
+- API endpoints: `/api/flowdrop-ai/tools`, `/api/flowdrop-ai/tools/by-category`
+- Tools displayed in sidebar with teaser mode for quick loading
+- Full tool details fetched on demand
+
+### Phase 5: Edit & Update ✅ COMPLETE (Config panels + tool connections)
+- [x] Implement update flow (modify existing configs)
+- [x] Handle config conflicts/validation
+- [x] Test: Edit existing agent, save changes
+- [x] **Added:** Fix tool-agent visual connections (edges with tool handles)
+- [x] **Added:** Fix config panel opening (JSON Schema format for configSchema)
+- [x] **Added:** Add nodeId to node data for proper handle ID generation
+
+**Notes:**
+- ConfigSchema must be JSON Schema format with `properties` object, not array
+- Node data must include `nodeId` field for FlowDrop to generate handle IDs
+- Tool ports use `dataType: "tool"` for special styling
+- Edge handles: `{nodeId}-output-tools` → `{nodeId}-input-tool`
+
+### Phase 6: Module Restructure & Modeler API Integration 🔲 IN PROGRESS
+**Major direction change based on user feedback**
+
+- [ ] **6.1 Study correct reference**: `ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php`
+  - NOT ECA Integration (that's for AI inside ECA, wrong pattern)
+  - This shows proper Modeler API integration with AI Agents
+- [ ] **6.2 Install and study BPMN.io module** (version 3 branch)
+  - Has working example of Modeler API loading/saving
+  - Understand how it connects UI to config entities
+- [ ] **6.3 Create new custom module**: `web/modules/custom/flowdrop_ui_agents/`
+  - Move relevant code from `flowdrop_ai_provider` (contrib)
+  - Keep clean separation: custom code in custom module
+- [ ] **6.4 Set up patch tracking**
+  - Track any patches needed for contrib modules
+  - Use composer patches or patches/ directory
+- [ ] **6.5 Improve configuration forms**
+  - Ensure all Agent fields editable in FlowDrop
+  - Consider hybrid: FlowDrop UI + Drupal forms for complex fields
+  - Make save process feel safe and reliable
+
+**Key insight from user:**
+> "I was wrong to use ECA AI Integration as a reference. Instead the file here: ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php shows how the Modeller API can be used to connect flowdrop to AI Agents."
+
+**Notes:**
+- Current `flowdrop_ai_provider` code may need refactoring based on Modeler API patterns
+- BPMN.io module shows working example of the pattern
+- May need to create Modeler plugin for FlowDrop UI
+
+### Phase 7: Multi-Agent Flows 🔲 NOT STARTED
 - [ ] Support multiple Agent nodes on canvas
 - [ ] Save/load flow connections between Agents
+- [ ] Implement agent-to-agent orchestration edges
 - [ ] Test: Multi-agent orchestration
 
-### Phase 7: Polish
-- [ ] UI position metadata storage
-- [ ] Error handling and validation
-- [ ] User feedback/messaging
+**Considerations:**
+- May need orchestration agent (triage_agent: true) as parent
+- Edge connections between agents define execution flow
+- Need to handle agent dependency ordering
+
+### Phase 8: Polish & Production Ready 🔲 NOT STARTED
+- [ ] **Critical: Ensure save works reliably**
+- [ ] Full round-trip testing: create, save, reload, edit, save
+- [ ] Error handling and validation feedback in UI
+- [ ] User feedback/messaging (success/error toasts)
 - [ ] Documentation
+- [ ] Position persistence verification
+
+**Notes:**
+- User explicitly mentioned not feeling comfortable saving yet
+- Need to make the save experience trustworthy
 
 ---
 
-## 6. Files to Modify/Create
+## 6. Files Created/Modified
 
-### Existing Files to Modify
+### Files Created (Phases 1-5)
 ```
 flowdrop_ai_provider/
-├── src/Plugin/FlowDropNodeProcessor/ChatModel.php  # May need updates
-└── flowdrop_ai_provider.info.yml                   # Add dependencies
-
-flowdrop/modules/flowdrop_ui/
-├── src/Service/                                    # Modify save service
-└── app/flowdrop/src/                              # Frontend changes
-```
-
-### New Files to Create
-```
-flowdrop_ai_provider/
+├── flowdrop_ai_provider.routing.yml         # All routes (pages + API)
+├── flowdrop_ai_provider.services.yml        # Service definitions
+├── flowdrop_ai_provider.links.menu.yml      # Admin menu links
+├── js/
+│   └── ai-agent-editor.js                   # FlowDrop integration JS
 ├── src/
-│   ├── Schema/
-│   │   ├── AssistantSchema.php
-│   │   └── AgentSchema.php
+│   ├── Controller/
+│   │   ├── AgentEditorController.php        # List/edit pages
+│   │   └── Api/
+│   │       ├── AgentsController.php         # Agent workflow API
+│   │       └── ToolsController.php          # Tool discovery API
+│   ├── Exception/
+│   │   ├── MappingException.php
+│   │   └── ValidationException.php
+│   ├── Service/
+│   │   └── FlowDropAiEndpointConfigService.php  # API config
 │   ├── Services/
-│   │   ├── AssistantRepository.php
-│   │   ├── AgentRepository.php
-│   │   └── ConfigMapper.php
-│   ├── TypedData/
-│   │   ├── AssistantDefinition.php
-│   │   └── AgentDefinition.php
-│   └── Normalizer/
-│       └── FlowDropConfigNormalizer.php
-└── flowdrop_ai_provider.services.yml              # Register services
+│   │   ├── FlowDropAgentMapper.php          # Core mapper service
+│   │   ├── FlowDropAgentMapperInterface.php
+│   │   ├── ToolDataProvider.php             # Tool information
+│   │   └── ToolDataProviderInterface.php
+│   └── TypedData/
+│       ├── FlowDropAgentModel.php           # Validation model
+│       └── FlowDropAgentModelDefinition.php
+└── flowdrop_ai_provider.libraries.yml       # JS library definition
 ```
+
+### Files Not Created (Changed from original plan)
+- `AssistantSchema.php` - Not needed, using AI Agent directly
+- `AssistantRepository.php` - Not needed, mapper handles CRUD
+- `AgentRepository.php` - Not needed, mapper handles CRUD
+- `FlowDropConfigNormalizer.php` - Not needed, using getRawData() on DTOs
+
+### Key File Responsibilities
+
+| File | Purpose |
+|------|---------|
+| `FlowDropAgentMapper.php` | Bidirectional conversion: Workflow ↔ AI Agent config |
+| `ToolDataProvider.php` | Queries Tool module, provides sidebar data |
+| `AgentsController.php` | REST API for workflow CRUD operations |
+| `ToolsController.php` | REST API for tool discovery |
+| `AgentEditorController.php` | Drupal pages for editing agents |
+| `ai-agent-editor.js` | Initializes FlowDrop with AI Agent data |
 
 ---
 
-## 7. Open Questions (To Resolve During Development)
+## 7. Open Questions
 
-1. **UI Position Metadata** - Where to store node X/Y positions? Options:
-   - Third-party storage in Assistant config
-   - Separate UI state config
-   - Browser local storage (loses cross-device)
+### Resolved ✅
 
-2. **Validation** - How strict should config validation be on save?
-   - Strict: Reject invalid configs
-   - Permissive: Save with warnings
+1. **UI Position Metadata** - Where to store node X/Y positions?
+   - **Answer:** Third-party settings in AI Agent config entity
+   - `$agent->setThirdPartySetting('flowdrop_ai_provider', 'positions', $positions)`
 
-3. **Existing Workflows** - What happens to existing FlowDrop workflow entities?
-   - Migration path?
-   - Keep working but deprecated?
+2. **Tool Discovery** - How to filter which Tools appear in drawer?
+   - **Answer:** Show all tools from `ai_agent` provider (tools exposed via Tool AI Connector)
+   - Filter by provider prefix: `ai_agent:*`
 
-4. **Tool Discovery** - How to filter which Tools appear in drawer?
-   - All available Tools?
-   - Only "agent-compatible" Tools?
-   - User-configurable?
+3. **Assistant API Integration** - Exact structure of Assistant config needs research
+   - **Answer:** Not using Assistants - working directly with AI Agent entities
+   - Assistants are just orchestration agents, unnecessary complexity for single-agent flows
 
-5. **Assistant API Integration** - Exact structure of Assistant config needs research:
-   - What fields does `ai_assistant_api` expect?
-   - How is agent orchestration defined?
+### Still Open 🔲
 
-6. **Modeler API Details** - Need to understand:
-   - How does Modeler API handle multiple model types?
-   - What hooks/events are available?
+4. **Validation** - How strict should config validation be on save?
+   - Options: Strict (reject) vs Permissive (save with warnings)
+   - Current: Basic validation via TypedData, no UI feedback yet
+
+5. **Existing Workflows** - What happens to existing FlowDrop workflow entities?
+   - Not addressed yet - this is a separate integration, not replacing workflow entities
+   - May need migration path if deprecating workflow entities
+
+6. **Multi-Agent Orchestration** - How to represent agent-to-agent flow?
+   - Need to determine: edges between agents, orchestration agent creation
+   - How does triage_agent vs orchestration_agent affect execution?
+
+7. **Save Persistence** - How to handle save failures gracefully?
+   - Need: error handling, rollback, user feedback
+   - Current: Basic try/catch, no UI feedback
 
 ---
 
@@ -355,9 +448,35 @@ web/modules/contrib/flowdrop/modules/
 
 ---
 
-## 10. Next Steps
+## 10. Progress & Next Steps
 
-1. **Commit this planning doc to main**
-2. **Create feature branch**: `feature/flowdrop-agent-integration`
-3. **Start Phase 1**: Deep-dive into Modeler API and ECA Integration code
-4. **First code task**: Create the ConfigMapper service skeleton
+### Completed ✅
+1. ~~Commit this planning doc to main~~
+2. ~~Create feature branch~~: `feature/flowdrop-phase2-implementation`
+3. ~~Phase 1-5 implementation~~ (see commits)
+
+### Current Status
+- **Branch:** `feature/flowdrop-phase2-implementation`
+- **Phases Complete:** 1-5
+- **Current Phase:** 6 - Module Restructure & Modeler API Integration
+- **Last Commit:** Phase 5 - Fix tool-agent connections and config panels
+
+### Phase 6 Priority (User Direction Change)
+1. **Study correct reference** - `ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php` (NOT ECA)
+2. **Install BPMN.io module** - Version 3 branch for working example
+3. **Create custom module** - `web/modules/custom/flowdrop_ui_agents/`
+4. **Track patches** - For any contrib module changes needed
+5. **Improve config forms** - User doesn't feel comfortable saving yet
+
+### Key User Feedback
+> "I was wrong to use ECA AI Integration as a reference. We can remove that entirely (that is for putting AI Agents inside ECA). Instead: ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php shows how the Modeller API can be used to connect flowdrop to AI Agents."
+
+### Commits on Branch
+```
+acca036 Phase 5: Fix tool-agent connections and config panels
+0d464b1 Phase 4: Add FlowDrop editor integration for AI Agents
+a6004b3 Phase 3: Add REST API endpoints for FlowDrop AI integration
+8356132 Phase 2: Implement FlowDrop to AI Agent mapping services
+46247d6 Add CLAUDE-NOTES.md with investigation findings
+6c4147e Phase 1: Research complete + add contrib modules for patching
+```
