@@ -1,0 +1,12 @@
+editor:
+  version: 1.x
+  js:
+    js/flowdrop-agents-editor.js: {}
+  css:
+    theme:
+      css/flowdrop-agents-editor.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - flowdrop_ui/editor

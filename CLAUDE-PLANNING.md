@@ -251,33 +251,69 @@ settings:
 - Tool ports use `dataType: "tool"` for special styling
 - Edge handles: `{nodeId}-output-tools` → `{nodeId}-input-tool`
 
-### Phase 6: Module Restructure & Modeler API Integration 🔲 IN PROGRESS
+### Phase 6: Module Restructure & Modeler API Integration ✅ COMPLETE
 **Major direction change based on user feedback**
 
-- [ ] **6.1 Study correct reference**: `ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php`
-  - NOT ECA Integration (that's for AI inside ECA, wrong pattern)
-  - This shows proper Modeler API integration with AI Agents
-- [ ] **6.2 Install and study BPMN.io module** (version 3 branch)
-  - Has working example of Modeler API loading/saving
-  - Understand how it connects UI to config entities
-- [ ] **6.3 Create new custom module**: `web/modules/custom/flowdrop_ui_agents/`
-  - Move relevant code from `flowdrop_ai_provider` (contrib)
-  - Keep clean separation: custom code in custom module
-- [ ] **6.4 Set up patch tracking**
-  - Track any patches needed for contrib modules
-  - Use composer patches or patches/ directory
-- [ ] **6.5 Improve configuration forms**
-  - Ensure all Agent fields editable in FlowDrop
-  - Consider hybrid: FlowDrop UI + Drupal forms for complex fields
-  - Make save process feel safe and reliable
+- [x] **6.1 Study correct reference**: `ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php`
+  - Understood ModelOwner plugin pattern
+  - Learned Component types and config key requirements
+- [x] **6.2 Install and study BPMN.io module** (version 3 branch)
+  - Installed `bpmn_io` module
+  - Discovered `flowdrop_modeler` exists but is ECA-specific
+- [x] **6.3 Create new custom module**: `web/modules/custom/flowdrop_ui_agents/`
+  - Created `FlowDropAgents` Modeler plugin
+  - Created `AgentWorkflowMapper` and `WorkflowParser` services
+  - JavaScript integration with FlowDrop UI
+- [x] **6.4 Set up patch tracking**
+  - Created `patches/` directory with README
+  - No patches needed yet - clean custom module approach
+- [x] **6.5 SAVE functionality working**
+  - Tested and verified save persists to AI Agent config
+  - Fixed workflow data capture timing issue
+  - Fixed Modeler API Component creation
 
-**Key insight from user:**
-> "I was wrong to use ECA AI Integration as a reference. Instead the file here: ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php shows how the Modeller API can be used to connect flowdrop to AI Agents."
+**Key Files Created:**
+```
+web/modules/custom/flowdrop_ui_agents/
+├── flowdrop_ui_agents.info.yml
+├── flowdrop_ui_agents.services.yml
+├── flowdrop_ui_agents.libraries.yml
+├── src/Plugin/ModelerApiModeler/FlowDropAgents.php
+├── src/Service/AgentWorkflowMapper.php
+├── src/Service/WorkflowParser.php
+├── js/flowdrop-agents-editor.js
+└── css/flowdrop-agents-editor.css
+```
 
-**Notes:**
-- Current `flowdrop_ai_provider` code may need refactoring based on Modeler API patterns
-- BPMN.io module shows working example of the pattern
-- May need to create Modeler plugin for FlowDrop UI
+**Access URL:** `/admin/config/ai/agents/{agent_id}/edit_with/flowdrop_agents`
+
+### Phase 6.5: Visual & UX Improvements 🔲 NOT STARTED
+**Port better features from flowdrop_ai_provider before removing it**
+
+- [ ] **6.5.1 Enhanced Tool Sidebar**
+  - Port `ToolDataProvider::getAvailableTools()` to show ALL tools
+  - Group tools by category (tools, agents, etc.)
+  - Add agents as draggable items
+
+- [ ] **6.5.2 Visual Node Distinction**
+  - Tools: smaller orange boxes (like flowdrop_ai_provider)
+  - Agents: larger purple/blue boxes
+  - Different icons per node type
+
+- [ ] **6.5.3 Tool Config Schema**
+  - Port per-tool settings (return_directly, require_usage, use_artifacts)
+  - Tool description override
+  - Progress message
+
+- [ ] **6.5.4 Remove flowdrop_ai_provider**
+  - Disable and uninstall module
+  - Remove from composer.json if local
+  - Clean up any orphaned config
+
+**Reference:** `flowdrop_ai_provider/src/Services/ToolDataProvider.php` has good patterns for:
+- Tool discovery and categorization
+- Config schema generation
+- Agent listing
 
 ### Phase 7: Multi-Agent Flows 🔲 NOT STARTED
 - [ ] Support multiple Agent nodes on canvas

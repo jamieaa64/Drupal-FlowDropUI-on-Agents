@@ -1,31 +1,63 @@
 _core:
   default_config_hash: 4GIX5Esnc_umpXUBj4IIocRX7Mt5fPhm4AgXfE3E56E
 module:
+  ai: 0
+  ai_agents: 0
+  ai_agents_explorer: 0
+  ai_api_explorer: 0
+  ai_assistant_api: 0
+  ai_chatbot: 0
+  ai_integration_eca: 0
+  ai_logging: 0
+  ai_observability: 0
+  ai_provider_openai: 0
+  ai_search: 0
   announcements_feed: 0
   automated_cron: 0
+  basic_auth: 0
   big_pipe: 0
   block: 0
   block_content: 0
+  bpmn_io: 0
   breakpoint: 0
   ckeditor5: 0
   comment: 0
   config: 0
   contact: 0
+  content_moderation: 0
   contextual: 0
   datetime: 0
   dblog: 0
   dynamic_page_cache: 0
+  eca: 0
+  eca_access: 0
+  eca_base: 0
+  eca_ui: 0
+  eca_user: 0
   editor: 0
   field: 0
   field_ui: 0
   file: 0
   filter: 0
+  flowdrop: 0
+  flowdrop_ai_provider: 0
+  flowdrop_modeler: 0
+  flowdrop_node_category: 0
+  flowdrop_node_type: 0
+  flowdrop_ui: 0
+  flowdrop_workflow: 0
+  gin_login: 0
+  gin_toolbar: 0
   help: 0
   history: 0
   image: 0
+  jsonapi: 0
+  key: 0
+  language: 0
   link: 0
   menu_link_content: 0
   menu_ui: 0
+  modeler_api: 0
   mysql: 0
   node: 0
   options: 0
@@ -33,17 +65,33 @@ module:
   path: 0
   path_alias: 0
   search: 0
+  search_api: 0
+  serialization: 0
   shortcut: 0
   system: 0
   taxonomy: 0
   text: 0
+  token: 0
+  tool: 0
+  tool_ai_connector: 0
+  tool_content: 0
+  tool_content_translation: 0
+  tool_entity: 0
+  tool_explorer: 0
+  tool_system: 0
+  tool_user: 0
   toolbar: 0
   update: 0
   user: 0
   views_ui: 0
+  workflows: 0
+  workspaces: 0
+  workspaces_ui: 0
+  content_translation: 10
   views: 10
   standard: 1000
 theme:
   olivero: 0
   claro: 0
+  gin: 0
 profile: standard

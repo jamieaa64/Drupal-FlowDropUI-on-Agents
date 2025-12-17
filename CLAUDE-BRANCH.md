@@ -4,140 +4,170 @@
 
 **IMPORTANT FOR FUTURE AGENTS**: This file documents the current branch's purpose, progress, and immediate next steps.
 
-- **Current Branch**: `feature/flowdrop-phase2-implementation`
-- **Phase**: 6 - Module Restructure & Modeler API Integration
+- **Current Branch**: `main` (ready to commit Phase 6 completion)
+- **Phase**: 6 Complete, Ready for Phase 6.5
 - **For historical context**: See `CLAUDE-NOTES.md` and `CLAUDE-PLANNING.md`
 
 ---
 
-## User Comments (Phase 6 Direction)
+## Current Status (2024-12-17)
 
-### Key Changes Requested
+### Phase 6 COMPLETE - Save is Working!
 
-1. **New Custom Module**: Create `flowdrop_ui_agents` in `web/modules/custom/`
-   - **ALL new code goes here** - not in `flowdrop_ai_provider` or `flowdrop_ui`
-   - Move relevant code from `flowdrop_ai_provider` (contrib) to custom module
-   - Keep track of any patches needed for contrib modules
-   - May need changes to FlowDrop UI library itself (via patches)
+Created `web/modules/custom/flowdrop_ui_agents/` with full Modeler API integration:
 
-2. **Reference File Change**: Stop using ECA AI Integration as reference
-   - **Wrong reference**: `ai_integration_eca/modules/agents/` (that's for AI Agents inside ECA)
-   - **Correct reference**: `ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php`
-   - This shows how Modeler API connects FlowDrop to AI Agents
+| Component | File | Purpose |
+|-----------|------|---------|
+| Modeler Plugin | `FlowDropAgents.php` | Registers `flowdrop_agents` modeler |
+| Mapper Service | `AgentWorkflowMapper.php` | AI Agent ↔ FlowDrop conversion |
+| Parser Service | `WorkflowParser.php` | JSON → Modeler API Components |
+| JavaScript | `flowdrop-agents-editor.js` | Editor init & save handling |
+| CSS | `flowdrop-agents-editor.css` | Basic styling |
 
-3. **BPMN.io Reference**: Install `bpmn_io` module (version 3 branch) to see working example
-   - Has example of loading/saving working with Modeler API
+**Test URL:** `/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
 
-4. **Drupal Forms Integration**: Config pages should load Drupal forms when editing Tools or Agents
-   - May need blend of Drupal form and FlowDrop UI
-   - Configuration form in FlowDrop needs all important Agent fields (like instructions)
-   - User doesn't feel comfortable saving yet - needs to be easier to use
+### What Works Now
+
+- Load AI Agent into FlowDrop visual editor
+- Display agent node with connected tools
+- Edit agent properties (description, system prompt, etc.)
+- **SAVE changes back to AI Agent config entity**
+- Ctrl+S / Cmd+S keyboard shortcut
 
 ---
 
-## Immediate Tasks for Phase 6
+## Next Phase: 6.5 - Visual & UX Improvements
 
-### Task 6.1: Study Correct Reference Implementation
-**File**: `web/modules/contrib/ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php`
+Before removing `flowdrop_ai_provider`, we need to port its better features:
 
-Questions to answer:
-- How does this plugin expose AI Agents to Modeler API?
-- What methods does it implement?
-- How does save/load work via Modeler API?
+### Priority 1: Enhanced Sidebar
+Currently only shows 1 tool. Need to show ALL available tools like `flowdrop_ai_provider` does.
 
-### Task 6.2: Install and Study BPMN.io Module
-**Module**: `bpmn_io` (version 3 branch)
+**Files to reference:**
+- `flowdrop_ai_provider/src/Services/ToolDataProvider.php` - `getAvailableTools()`
+- `flowdrop_ai_provider/src/Controller/Api/ToolsController.php` - API endpoints
 
-Questions to answer:
-- How does it use Modeler API?
-- How does the loading/saving example work?
-- Can we use FlowDrop UI as a modeler with this pattern?
+### Priority 2: Visual Node Distinction
+Tools should look different from Agents:
+- **Agents**: Larger purple/blue boxes
+- **Tools**: Smaller orange boxes
 
-### Task 6.3: Create New Custom Module
-**Location**: `web/modules/custom/flowdrop_ui_agents/`
-
-**Important**: ALL code for this feature goes in this custom module. Do NOT add to:
-- `flowdrop_ai_provider` (contrib)
-- `flowdrop_ui` (contrib)
-- `flowdrop` (contrib)
-
-Structure:
+**Reference:** `FlowDropAgentMapper::toolsToToolNodes()` has the styling:
+```php
+'color' => 'var(--color-ref-orange-500)',
+'icon' => 'mdi:tools',
 ```
-flowdrop_ui_agents/
+
+### Priority 3: Tool Config Schema
+Per-tool settings that should be editable:
+- `return_directly` - Return tool result without LLM rewriting
+- `require_usage` - Agent must use this tool
+- `use_artifacts` - Store large responses
+- `description_override` - Custom tool description
+- `progress_message` - UI feedback during execution
+
+### Priority 4: Remove flowdrop_ai_provider
+After features ported:
+```bash
+ddev drush pmu flowdrop_ai_provider
+# Remove from composer.json if needed
+```
+
+---
+
+## Files Created in Phase 6
+
+```
+web/modules/custom/flowdrop_ui_agents/
 ├── flowdrop_ui_agents.info.yml
-├── flowdrop_ui_agents.module
 ├── flowdrop_ui_agents.services.yml
-├── flowdrop_ui_agents.routing.yml
+├── flowdrop_ui_agents.libraries.yml
 ├── src/
-│   ├── Controller/           # Move from flowdrop_ai_provider
-│   ├── Services/             # Move from flowdrop_ai_provider
-│   └── Plugin/
-│       └── ... (TBD based on Modeler API research)
-├── js/                       # Move from flowdrop_ai_provider
+│   ├── Plugin/ModelerApiModeler/
+│   │   └── FlowDropAgents.php
+│   └── Service/
+│       ├── AgentWorkflowMapper.php
+│       └── WorkflowParser.php
+├── js/
+│   └── flowdrop-agents-editor.js
+├── css/
+│   └── flowdrop-agents-editor.css
 └── patches/
-    └── README.md  # Track patches to contrib modules
+    └── README.md
 ```
 
-### Task 6.4: Determine Patch Strategy
-- What changes to `flowdrop` or `flowdrop_ui` are needed?
-- How to track and manage patches?
-- Can we use composer patches?
+---
 
-### Task 6.5: Improve Configuration Forms
-- Ensure all Agent fields are editable in FlowDrop
-- Consider hybrid approach: FlowDrop UI + Drupal forms
-- Make save process feel safe/reliable
+## How the System Works
+
+### Architecture
+```
+┌─────────────────┐      ┌─────────────────────┐      ┌──────────────────┐
+│   AI Agent      │ ←──→ │  flowdrop_agents    │ ←──→ │   FlowDrop UI    │
+│   Config Entity │      │  (Modeler Plugin)   │      │   (Visual Editor)│
+└─────────────────┘      └─────────────────────┘      └──────────────────┘
+        │                          │                           │
+   ai_agents_agent           AgentWorkflowMapper          flowdrop_ui
+   (ModelOwner)              WorkflowParser               (JS Library)
+```
+
+### Load Flow
+1. User visits `/admin/config/ai/agents/{id}/edit_with/flowdrop_agents`
+2. `FlowDropAgents::convert()` → `AgentWorkflowMapper::agentToWorkflow()`
+3. Returns workflow JSON with nodes, edges, metadata
+4. FlowDrop UI renders the visual editor
+
+### Save Flow
+1. User clicks "Save AI Agent" or Ctrl+S
+2. JavaScript calls `app.getWorkflow()` to get current state
+3. POST to `/admin/modeler_api/ai_agent/flowdrop_agents/save`
+4. `FlowDropAgents::parseData()` → `WorkflowParser::toComponents()`
+5. Returns `Component[]` objects
+6. `Agent::addComponent()` updates AI Agent entity
 
 ---
 
-## Current State (What Exists)
+## Key Technical Notes
 
-### Files in `flowdrop_ai_provider` (contrib)
-These were created in Phases 1-5 but may need to move to custom module:
+### Component Types (from modeler_api/Api.php)
+```php
+COMPONENT_TYPE_START = 1    // Agent node
+COMPONENT_TYPE_ELEMENT = 4  // Tool node
+COMPONENT_TYPE_LINK = 5     // Edge/connection
+```
 
-- `FlowDropAgentMapper.php` - Bidirectional workflow ↔ agent conversion
-- `ToolDataProvider.php` - Tool information for sidebar
-- `AgentsController.php` / `ToolsController.php` - REST API
-- `AgentEditorController.php` - Edit pages
-- `ai-agent-editor.js` - FlowDrop initialization
+### Agent Config Keys (must match AiAgentForm)
+```php
+'agent_id', 'label', 'description', 'system_prompt',
+'max_loops', 'orchestration_agent', 'triage_agent',
+'secured_system_prompt', 'default_information_tools',
+'structured_output_enabled', 'structured_output_schema'
+```
 
-### What Works
-- Loading agent as FlowDrop workflow ✅
-- Tool sidebar with drag/drop ✅
-- Tool-agent edge connections ✅
-- Config panel with JSON Schema ✅
-- API endpoints ✅
-
-### What Needs Work
-- Save functionality not fully tested
-- Configuration form completeness
-- Modeler API integration (proper way)
-- Module location (contrib → custom)
+### JavaScript Timing Issue (FIXED)
+Must use `editorContainer.flowdropApp` NOT `window.currentFlowDropApp` because the navbar onclick handler captures scope before the global is set.
 
 ---
 
-## Questions for Research
-
-1. **ModelerApiModelOwner Plugin**: What interface/methods does `Agent.php` implement?
-2. **FlowDrop + Modeler API**: Can FlowDrop UI be used as a Modeler with Modeler API?
-3. **Form Integration**: How to blend FlowDrop config panels with full Drupal forms?
-4. **Patch Management**: Best practice for tracking contrib module patches?
-
----
-
-## Next Agent Instructions
+## For Next Agent
 
 ```
-Continue Phase 6 for FlowDrop AI Provider.
-Branch: feature/flowdrop-phase2-implementation
+Continue with Phase 6.5 - Visual & UX Improvements
 
-IMPORTANT: Read user comments above - key direction change:
-1. Study ai_agents/src/Plugin/ModelerApiModelOwner/Agent.php (NOT ECA integration)
-2. Install bpmn_io module (v3 branch) to see working example
-3. Create new custom module: web/modules/custom/flowdrop_ui_agents/
-4. Determine what patches are needed to contrib modules
+CURRENT STATE: Phase 6 complete, save working!
+MODULE: web/modules/custom/flowdrop_ui_agents/
 
-Start with Task 6.1 - study the Agent.php ModelerApiModelOwner plugin.
+NEXT TASKS:
+1. Port ToolDataProvider to show all tools in sidebar
+2. Add visual distinction between tool and agent nodes
+3. Add per-tool config settings
+4. Then remove flowdrop_ai_provider module
+
+REFERENCE CODE:
+- flowdrop_ai_provider/src/Services/ToolDataProvider.php
+- flowdrop_ai_provider/src/Services/FlowDropAgentMapper.php
+
+TEST URL: /admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents
 ```
 
 ---
@@ -146,6 +176,6 @@ Start with Task 6.1 - study the Agent.php ModelerApiModelOwner plugin.
 
 | File | Purpose |
 |------|---------|
-| `CLAUDE-NOTES.md` | Historical findings, data structures, lessons learned |
-| `CLAUDE-PLANNING.md` | Full implementation plan, phase details, open questions |
+| `CLAUDE-NOTES.md` | Historical findings, technical details |
+| `CLAUDE-PLANNING.md` | Full implementation plan, all phases |
 | `CLAUDE.md` | General project guidance, DDEV commands |

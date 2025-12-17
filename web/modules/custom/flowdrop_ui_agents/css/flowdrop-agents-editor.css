@@ -1,0 +1,33 @@
+/**
+ * @file
+ * FlowDrop Agents Editor styles.
+ */
+
+.flowdrop-agents-editor-container {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+/* Agent node styling */
+.flowdrop-agents-editor-container [data-node-type="agent"] {
+  border-color: #3b82f6;
+}
+
+.flowdrop-agents-editor-container [data-node-type="agent"] .node-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* Tool node styling */
+.flowdrop-agents-editor-container [data-node-type="tool"] {
+  border-color: #f59e0b;
+}
+
+.flowdrop-agents-editor-container [data-node-type="tool"] .node-header {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+/* Tool connection edge styling */
+.flowdrop-agents-editor-container [data-edge-type="tool"] {
+  stroke: #f59e0b;
+  stroke-dasharray: 5, 5;
+}

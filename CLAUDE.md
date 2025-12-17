@@ -22,13 +22,20 @@ Create a visual flow builder for AI Agents that:
 | `drupal/tool` | Tool API |
 | `drupal/flowdrop` | Original FlowDrop module |
 | `drupal/flowdrop_ui` | Visual UI (being separated from core module) |
-| `drupal/flowdrop_ai_provider` | Connects FlowDrop to AI Agents |
-| `drupal/modeler_api` | Potential connection method to AI Agents |
+| `drupal/modeler_api` | Connects visual editors to config entities |
+| `flowdrop_ui_agents` | **CUSTOM** - FlowDrop editor for AI Agents via Modeler API |
+| `drupal/flowdrop_ai_provider` | OLD - Being replaced by flowdrop_ui_agents |
 | `drupal/eca` | Event-Condition-Action framework |
-| `drupal/ai_integration_eca` | Reference for BPMN front-end to AI Agents |
 | `drupal/gin` | Admin theme |
 | `drupal/key` | API key management |
 | `drupal/search_api` | Search functionality |
+
+### Current Implementation Status
+**Phase 6 Complete** - FlowDrop visual editor now saves to AI Agent config entities!
+
+**Test URL:** `/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
+
+**Next Phase (6.5):** Port visual improvements from flowdrop_ai_provider, then remove it.
 
 ## Development Environment
 
@@ -84,13 +91,25 @@ In Drupal, use the Key module with "Environment" provider to access these.
 ├── config/sync/        # Drupal configuration (version controlled)
 ├── web/                # Drupal docroot
 │   ├── modules/custom/ # Custom modules
+│   │   └── flowdrop_ui_agents/  # FlowDrop AI Agents integration (MAIN DEV)
 │   ├── themes/custom/  # Custom themes
 │   └── sites/default/  # Site settings
 ├── composer.json       # PHP dependencies
 ├── CLAUDE.md           # This file - AI agent guidance
 ├── CLAUDE-BRANCH.md    # Current branch context and progress
-├── CODEX-BRANCH.md     # Code review notes from Codex
+├── CLAUDE-NOTES.md     # Historical findings and technical details
+├── CLAUDE-PLANNING.md  # Full implementation plan
 └── README.md           # Project documentation
+```
+
+### Custom Module: flowdrop_ui_agents
+```
+web/modules/custom/flowdrop_ui_agents/
+├── src/Plugin/ModelerApiModeler/FlowDropAgents.php  # Modeler plugin
+├── src/Service/AgentWorkflowMapper.php              # Agent ↔ FlowDrop conversion
+├── src/Service/WorkflowParser.php                   # JSON → Components
+├── js/flowdrop-agents-editor.js                     # FlowDrop init & save
+└── css/flowdrop-agents-editor.css                   # Styling
 ```
 
 ## Development Workflow
