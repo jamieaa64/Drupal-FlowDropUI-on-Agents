@@ -1,5 +1,39 @@
-# FlowDrop AI Provider API Routes
+# FlowDrop AI Provider Routes
 # These endpoints enable the FlowDrop UI to save/load AI Agent configurations
+
+# ============================================================================
+# EDITOR PAGES
+# Visual editor pages for creating/editing AI Agents with FlowDrop
+# ============================================================================
+
+flowdrop_ai_provider.agents.list:
+  path: '/admin/config/ai/flowdrop-ai/agents'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\AgentEditorController::listAgents'
+    _title: 'AI Agents (FlowDrop)'
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.agent.create:
+  path: '/admin/config/ai/flowdrop-ai/agents/create'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\AgentEditorController::createAgent'
+    _title: 'Create AI Agent'
+  requirements:
+    _permission: 'administer ai_agent'
+
+flowdrop_ai_provider.agent.edit:
+  path: '/admin/config/ai/flowdrop-ai/agents/{agent_id}/edit'
+  defaults:
+    _controller: '\Drupal\flowdrop_ai_provider\Controller\AgentEditorController::editAgent'
+    _title_callback: '\Drupal\flowdrop_ai_provider\Controller\AgentEditorController::editAgentTitle'
+  requirements:
+    _permission: 'administer ai_agent'
+    agent_id: '[a-z0-9_]+'
+
+# ============================================================================
+# API ENDPOINTS
+# ============================================================================
 
 # ============================================================================
 # AGENT CRUD ENDPOINTS

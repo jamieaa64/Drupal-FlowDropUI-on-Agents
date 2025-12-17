@@ -1,0 +1,13 @@
+# FlowDrop AI Provider Libraries
+
+# AI Agent Editor library
+# Provides the FlowDrop editor configured for AI Agent editing
+editor:
+  version: VERSION
+  js:
+    js/ai-agent-editor.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - flowdrop_ui/editor

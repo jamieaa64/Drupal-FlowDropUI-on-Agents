@@ -246,10 +246,10 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
         $yOffset += 200;
       }
 
-      // Rebuild node with position.
-      $nodeData = $agentNode->toArray();
+      // Get raw data (frontend format) and update position.
+      $nodeData = $agentNode->getRawData();
       $nodeData['position'] = $position;
-      $nodes[$nodeId] = WorkflowNodeDTO::fromArray(['id' => $nodeId, 'position' => $position] + $nodeData);
+      $nodes[$nodeId] = WorkflowNodeDTO::fromArray($nodeData);
 
       // Convert tools to tool nodes.
       $enabledTools = array_keys(array_filter($agent->get('tools') ?? []));
@@ -289,6 +289,7 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
   public function agentConfigToNode(AiAgent $agent): WorkflowNodeDTO {
     $agentId = $agent->id();
 
+    // Build node in FlowDrop frontend format.
     $nodeData = [
       'id' => 'agent_' . $agentId,
       'type' => 'universalNode',
@@ -310,15 +311,41 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
         ],
         'metadata' => [
           'id' => 'ai_agent',
-          'name' => 'AI Agent',
+          'name' => $agent->label(),
           'executor_plugin' => 'chat_model',
           'category' => 'models',
           'agent_id' => $agentId,
+          'type' => 'agent',
+          'supportedTypes' => ['agent'],
+          'icon' => 'mdi:robot',
+          'color' => 'var(--color-ref-purple-500)',
           'inputs' => [
-            ['id' => 'message', 'dataType' => 'string', 'label' => 'Message'],
+            [
+              'id' => 'trigger',
+              'name' => 'Trigger',
+              'type' => 'input',
+              'dataType' => 'trigger',
+              'required' => FALSE,
+              'description' => 'Trigger input',
+            ],
+            [
+              'id' => 'message',
+              'name' => 'Message',
+              'type' => 'input',
+              'dataType' => 'string',
+              'required' => FALSE,
+              'description' => 'Input message',
+            ],
           ],
           'outputs' => [
-            ['id' => 'response', 'dataType' => 'string', 'label' => 'Response'],
+            [
+              'id' => 'response',
+              'name' => 'Response',
+              'type' => 'output',
+              'dataType' => 'string',
+              'required' => FALSE,
+              'description' => 'Agent response',
+            ],
           ],
         ],
       ],
@@ -356,6 +383,7 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
       $toolLabel = end($toolParts);
       $toolLabel = ucwords(str_replace(['_', '-'], ' ', $toolLabel));
 
+      // Build node in FlowDrop frontend format.
       $nodeData = [
         'id' => $nodeId,
         'type' => 'universalNode',
@@ -365,14 +393,36 @@ class FlowDropAgentMapper implements FlowDropAgentMapperInterface {
             'tool_id' => $toolId,
           ],
           'metadata' => [
-            'id' => 'tool',
+            'id' => $toolId,
             'name' => $toolLabel,
             'executor_plugin' => 'tool',
             'category' => 'tools',
             'tool_id' => $toolId,
             'parentNode' => $parentAgentNodeId,
-            'inputs' => [],
-            'outputs' => [],
+            'type' => 'tool',
+            'supportedTypes' => ['tool'],
+            'icon' => 'mdi:tools',
+            'color' => 'var(--color-ref-orange-500)',
+            'inputs' => [
+              [
+                'id' => 'trigger',
+                'name' => 'Trigger',
+                'type' => 'input',
+                'dataType' => 'trigger',
+                'required' => FALSE,
+                'description' => 'Trigger input',
+              ],
+            ],
+            'outputs' => [
+              [
+                'id' => 'result',
+                'name' => 'Result',
+                'type' => 'output',
+                'dataType' => 'mixed',
+                'required' => FALSE,
+                'description' => 'Tool result',
+              ],
+            ],
           ],
         ],
         'position' => $position,

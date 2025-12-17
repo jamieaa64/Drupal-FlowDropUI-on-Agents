@@ -43,43 +43,203 @@ class ToolDataProvider implements ToolDataProviderInterface {
     foreach ($this->toolManager->getDefinitions() as $pluginId => $definition) {
       // ToolDefinition is an object, not an array.
       if ($definition instanceof ToolDefinition) {
-        $toolInfo = [
-          'id' => $pluginId,
-          'label' => (string) $definition->getLabel(),
-          'description' => (string) $definition->getDescription(),
-          'category' => (string) ($definition->get('category') ?? 'General'),
-        ];
+        $label = (string) $definition->getLabel();
+        $description = (string) $definition->getDescription();
+        $category = (string) ($definition->get('category') ?? 'General');
       }
       else {
         // Fallback for array-based definitions.
-        $toolInfo = [
-          'id' => $pluginId,
-          'label' => (string) ($definition['label'] ?? $pluginId),
-          'description' => (string) ($definition['description'] ?? ''),
-          'category' => (string) ($definition['category'] ?? 'General'),
-        ];
+        $label = (string) ($definition['label'] ?? $pluginId);
+        $description = (string) ($definition['description'] ?? '');
+        $category = (string) ($definition['category'] ?? 'General');
       }
+
+      // Build FlowDrop-compatible node format.
+      $toolInfo = [
+        'id' => $pluginId,
+        'name' => $label,
+        'type' => 'tool',
+        'supportedTypes' => ['tool'],
+        'description' => $description,
+        'category' => $this->transformCategoryToPlural($category),
+        'icon' => 'mdi:tools',
+        'color' => $this->getCategoryColor($category),
+        'version' => '1.0.0',
+        'enabled' => TRUE,
+        'tags' => [$category],
+        'executor_plugin' => 'tool:' . $pluginId,
+        'inputs' => [
+          [
+            'id' => 'trigger',
+            'name' => 'Trigger',
+            'type' => 'input',
+            'dataType' => 'trigger',
+            'required' => FALSE,
+            'description' => 'Trigger input',
+          ],
+        ],
+        'outputs' => [
+          [
+            'id' => 'result',
+            'name' => 'Result',
+            'type' => 'output',
+            'dataType' => 'mixed',
+            'required' => FALSE,
+            'description' => 'Tool execution result',
+          ],
+        ],
+        'config' => [],
+        'configSchema' => [],
+      ];
 
       // Add full details in 'full' view mode.
       if ($viewMode === 'full') {
         try {
-          $toolInfo['configuration'] = $this->getToolConfigSchema($pluginId);
+          $toolInfo['configSchema'] = $this->getToolConfigSchema($pluginId);
+          // Get more detailed input/output definitions.
+          $instance = $this->toolManager->createInstance($pluginId);
+          $inputDefs = $this->normalizeDefinitions($instance->getInputDefinitions());
+          $outputDefs = $this->normalizeDefinitions($instance->getOutputDefinitions());
+
+          if (!empty($inputDefs)) {
+            // Add trigger input first.
+            $toolInfo['inputs'] = array_merge(
+              [[
+                'id' => 'trigger',
+                'name' => 'Trigger',
+                'type' => 'input',
+                'dataType' => 'trigger',
+                'required' => FALSE,
+                'description' => 'Trigger input',
+              ]],
+              $this->convertToFlowDropPorts($inputDefs, 'input')
+            );
+          }
+          if (!empty($outputDefs)) {
+            $toolInfo['outputs'] = $this->convertToFlowDropPorts($outputDefs, 'output');
+          }
         }
         catch (\Exception $e) {
-          $toolInfo['configuration'] = [];
+          // Keep defaults on error.
         }
       }
 
       $tools[] = $toolInfo;
     }
 
-    // Sort by category then label.
+    // Sort by category then name.
     usort($tools, function ($a, $b) {
       $categoryCompare = strcmp($a['category'], $b['category']);
-      return $categoryCompare !== 0 ? $categoryCompare : strcmp($a['label'], $b['label']);
+      return $categoryCompare !== 0 ? $categoryCompare : strcmp($a['name'], $b['name']);
     });
 
     return $tools;
+  }
+
+  /**
+   * Convert normalized definitions to FlowDrop port format.
+   *
+   * @param array $definitions
+   *   Normalized definitions.
+   * @param string $portType
+   *   Port type ('input' or 'output').
+   *
+   * @return array
+   *   FlowDrop port format.
+   */
+  protected function convertToFlowDropPorts(array $definitions, string $portType): array {
+    $ports = [];
+    foreach ($definitions as $def) {
+      $ports[] = [
+        'id' => $def['name'],
+        'name' => $def['label'],
+        'type' => $portType,
+        'dataType' => $this->mapTypeToFlowDropType($def['type']),
+        'required' => $def['required'] ?? FALSE,
+        'description' => $def['description'] ?? '',
+      ];
+    }
+    return $ports;
+  }
+
+  /**
+   * Map PHP/Drupal type to FlowDrop data type.
+   *
+   * @param string $type
+   *   The type string.
+   *
+   * @return string
+   *   FlowDrop data type.
+   */
+  protected function mapTypeToFlowDropType(string $type): string {
+    $mapping = [
+      'string' => 'string',
+      'text' => 'string',
+      'integer' => 'number',
+      'int' => 'number',
+      'float' => 'number',
+      'boolean' => 'boolean',
+      'bool' => 'boolean',
+      'array' => 'array',
+      'list' => 'array',
+      'object' => 'json',
+      'map' => 'json',
+      'any' => 'mixed',
+    ];
+    return $mapping[$type] ?? 'string';
+  }
+
+  /**
+   * Transform singular category to plural form for FlowDrop API.
+   *
+   * @param string $category
+   *   The singular category.
+   *
+   * @return string
+   *   The plural category.
+   */
+  protected function transformCategoryToPlural(string $category): string {
+    $mapping = [
+      'trigger' => 'triggers',
+      'input' => 'inputs',
+      'output' => 'outputs',
+      'model' => 'models',
+      'prompt' => 'prompts',
+      'processing' => 'processing',
+      'logic' => 'logic',
+      'data' => 'data',
+      'helper' => 'helpers',
+      'tool' => 'tools',
+      'vectorstore' => 'vectorstores',
+      'embedding' => 'embeddings',
+      'memory' => 'memories',
+      'agent' => 'agents',
+      'bundle' => 'bundles',
+      'General' => 'tools',
+    ];
+    return $mapping[$category] ?? strtolower($category) . 's';
+  }
+
+  /**
+   * Get color for a category.
+   *
+   * @param string $category
+   *   The category.
+   *
+   * @return string
+   *   CSS color value.
+   */
+  protected function getCategoryColor(string $category): string {
+    $colors = [
+      'trigger' => 'var(--color-ref-red-500)',
+      'input' => 'var(--color-ref-blue-500)',
+      'output' => 'var(--color-ref-green-500)',
+      'model' => 'var(--color-ref-purple-500)',
+      'tool' => 'var(--color-ref-orange-500)',
+      'agent' => 'var(--color-ref-cyan-500)',
+      'General' => 'var(--color-ref-gray-500)',
+    ];
+    return $colors[$category] ?? 'var(--color-ref-gray-500)';
   }
 
   /**
@@ -90,6 +250,7 @@ class ToolDataProvider implements ToolDataProviderInterface {
     $grouped = [];
 
     foreach ($tools as $tool) {
+      // Use the already-transformed plural category from the tool.
       $category = $tool['category'];
       if (!isset($grouped[$category])) {
         $grouped[$category] = [];
@@ -226,12 +387,56 @@ class ToolDataProvider implements ToolDataProviderInterface {
     $allAgents = $storage->loadMultiple();
 
     foreach ($allAgents as $agent) {
+      $agentId = $agent->id();
+      $label = $agent->label();
+      $description = $agent->get('description') ?? '';
+
+      // Build FlowDrop-compatible node format for agents.
       $agentInfo = [
-        'id' => $agent->id(),
-        'label' => $agent->label(),
-        'description' => $agent->get('description') ?? '',
-        // Tool ID format for using agents as tools.
-        'tool_id' => 'ai_agents::ai_agent::' . $agent->id(),
+        'id' => 'ai_agent_' . $agentId,
+        'name' => $label,
+        'type' => 'agent',
+        'supportedTypes' => ['agent'],
+        'description' => $description,
+        'category' => 'agents',
+        'icon' => 'mdi:robot',
+        'color' => 'var(--color-ref-purple-500)',
+        'version' => '1.0.0',
+        'enabled' => TRUE,
+        'tags' => ['agent'],
+        'executor_plugin' => 'ai_agents::ai_agent::' . $agentId,
+        'agent_id' => $agentId,
+        'tool_id' => 'ai_agents::ai_agent::' . $agentId,
+        'inputs' => [
+          [
+            'id' => 'trigger',
+            'name' => 'Trigger',
+            'type' => 'input',
+            'dataType' => 'trigger',
+            'required' => FALSE,
+            'description' => 'Trigger input',
+          ],
+          [
+            'id' => 'message',
+            'name' => 'Message',
+            'type' => 'input',
+            'dataType' => 'string',
+            'required' => FALSE,
+            'description' => 'Input message',
+          ],
+        ],
+        'outputs' => [
+          [
+            'id' => 'response',
+            'name' => 'Response',
+            'type' => 'output',
+            'dataType' => 'string',
+            'required' => FALSE,
+            'description' => 'Agent response',
+          ],
+        ],
+        'config' => [],
+        'configSchema' => [],
       ];
 
       if ($viewMode === 'full') {
@@ -244,8 +449,8 @@ class ToolDataProvider implements ToolDataProviderInterface {
       $agents[] = $agentInfo;
     }
 
-    // Sort by label.
-    usort($agents, fn($a, $b) => strcmp($a['label'], $b['label']));
+    // Sort by name.
+    usort($agents, fn($a, $b) => strcmp($a['name'], $b['name']));
 
     return $agents;
   }

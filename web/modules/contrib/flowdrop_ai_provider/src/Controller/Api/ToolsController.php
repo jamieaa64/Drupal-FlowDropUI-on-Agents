@@ -48,24 +48,33 @@ final class ToolsController extends ControllerBase {
   }
 
   /**
-   * Get all available tools.
+   * Get all available tools (and agents).
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
-   *   JSON response with all tools.
+   *   JSON response with all tools and agents.
    */
   public function getTools(Request $request): JsonResponse {
     try {
       $viewMode = $request->query->get('view_mode', 'teaser');
+      $includeAgents = $request->query->get('include_agents', 'true') === 'true';
+
+      // Get tools.
       $tools = $this->toolDataProvider->getAvailableTools($viewMode);
+
+      // Optionally include agents as draggable nodes.
+      if ($includeAgents) {
+        $agents = $this->toolDataProvider->getAvailableAgents($viewMode);
+        $tools = array_merge($agents, $tools);
+      }
 
       return $this->jsonResponse([
         'success' => TRUE,
         'data' => $tools,
         'count' => count($tools),
-        'message' => sprintf('Found %d tools', count($tools)),
+        'message' => sprintf('Found %d nodes', count($tools)),
       ]);
     }
     catch (\Exception $e) {
@@ -83,14 +92,31 @@ final class ToolsController extends ControllerBase {
   }
 
   /**
-   * Get tools grouped by category.
+   * Get tools grouped by category (including agents).
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
-   *   JSON response with tools grouped by category.
+   *   JSON response with tools and agents grouped by category.
    */
   public function getToolsByCategory(): JsonResponse {
     try {
       $grouped = $this->toolDataProvider->getToolsByCategory();
+
+      // Add agents as their own category.
+      $agents = $this->toolDataProvider->getAvailableAgents('teaser');
+      if (!empty($agents)) {
+        $grouped['agents'] = $agents;
+      }
+
+      // Sort categories to put agents first.
+      uksort($grouped, function ($a, $b) {
+        if ($a === 'agents') {
+          return -1;
+        }
+        if ($b === 'agents') {
+          return 1;
+        }
+        return strcmp($a, $b);
+      });
 
       return $this->jsonResponse([
         'success' => TRUE,

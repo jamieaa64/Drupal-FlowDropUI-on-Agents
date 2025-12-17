@@ -24,3 +24,9 @@ services:
     arguments:
       - '@plugin.manager.tool'
       - '@entity_type.manager'
+
+  # Endpoint Config Service - generates endpoint configuration for AI Agent editing
+  flowdrop_ai_provider.endpoint_config:
+    class: Drupal\flowdrop_ai_provider\Service\FlowDropAiEndpointConfigService
+    arguments:
+      - '@language_manager'

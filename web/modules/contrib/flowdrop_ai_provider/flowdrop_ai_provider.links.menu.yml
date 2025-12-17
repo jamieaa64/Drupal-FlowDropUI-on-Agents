@@ -1,0 +1,8 @@
+# FlowDrop AI Provider menu links
+
+flowdrop_ai_provider.agents:
+  title: 'AI Agents (FlowDrop)'
+  description: 'Edit AI Agents using the FlowDrop visual editor.'
+  parent: ai.admin
+  route_name: flowdrop_ai_provider.agents.list
+  weight: 50

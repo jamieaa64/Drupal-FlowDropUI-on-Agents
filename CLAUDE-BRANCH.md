@@ -616,13 +616,162 @@ All API endpoints verified working:
 
 ---
 
-## Next Phase: Phase 4 - Frontend Integration
+## Current Phase: Phase 4 - Frontend Integration ✅ COMPLETE
 
 ### Phase 4 Objectives
-1. Modify FlowDrop UI (Svelte) to call new API endpoints
-2. Add "Save to AI Agent" option in FlowDrop save dialog
-3. Add "Load from AI Agent" option in FlowDrop load dialog
-4. Create new node type drawer for AI-specific nodes
+1. ✅ Create dedicated FlowDrop editor pages for AI Agents
+2. ✅ Add editor controller and routes
+3. ✅ Configure FlowDrop to use AI Agent API endpoints
+4. ✅ Add menu links for easy navigation
+
+### Architecture Decision
+Instead of modifying the existing FlowDrop UI (which uses the `@d34dman/flowdrop` npm package), we created a **dedicated editor** in `flowdrop_ai_provider` that:
+- Uses the same FlowDrop library (`flowdrop_ui/editor`)
+- Configures it with our AI Agent API endpoints
+- Saves directly to AI Agent config entities instead of flowdrop_workflow entities
+
+### Files Created
+
+**Service:**
+- `src/Service/FlowDropAiEndpointConfigService.php` - Generates endpoint config for AI Agent API
+
+**Controller:**
+- `src/Controller/AgentEditorController.php` - List, create, and edit AI Agents in FlowDrop
+
+**JavaScript:**
+- `js/ai-agent-editor.js` - Drupal behavior for AI Agent FlowDrop editor
+
+**Libraries:**
+- `flowdrop_ai_provider.libraries.yml` - Defines the editor library
+
+**Menu:**
+- `flowdrop_ai_provider.links.menu.yml` - Menu link under AI admin
+
+**Routes added to `flowdrop_ai_provider.routing.yml`:**
+
+| Route | Path | Description |
+|-------|------|-------------|
+| `flowdrop_ai_provider.agents.list` | `/admin/config/ai/flowdrop-ai/agents` | List AI Agents |
+| `flowdrop_ai_provider.agent.create` | `/admin/config/ai/flowdrop-ai/agents/create` | Create new agent |
+| `flowdrop_ai_provider.agent.edit` | `/admin/config/ai/flowdrop-ai/agents/{id}/edit` | Edit existing agent |
+
+### How It Works
+
+1. **List Page** (`/admin/config/ai/flowdrop-ai/agents`)
+   - Shows all AI Agents with "Edit in FlowDrop" links
+   - "Create new AI Agent" button
+
+2. **Create Page** (`/admin/config/ai/flowdrop-ai/agents/create`)
+   - Opens FlowDrop editor with empty workflow
+   - Saves new agent via `POST /api/flowdrop-ai/workflow/save`
+
+3. **Edit Page** (`/admin/config/ai/flowdrop-ai/agents/{id}/edit`)
+   - Loads agent as FlowDrop workflow
+   - Saves changes via `POST /api/flowdrop-ai/workflow/save`
+
+### Endpoint Configuration
+
+The editor is configured with these endpoints (mapped from FlowDrop conventions to AI Agent API):
+
+| FlowDrop Function | AI Agent Endpoint |
+|-------------------|-------------------|
+| `workflows.list` | `/agents` |
+| `workflows.get` | `/agents/{id}/workflow` |
+| `workflows.create` | `/workflow/save` |
+| `workflows.update` | `/workflow/save` |
+| `nodes.list` | `/tools` |
+| `nodes.byCategory` | `/tools/by-category` |
+
+### Testing Results
+
+All controllers and services verified working:
+- List agents: Returns table with 5 agents and edit links
+- Edit agent: Loads agent as workflow with FlowDrop settings attached
+- Endpoint config: Correctly maps FlowDrop functions to AI Agent API
+
+### How to Access
+
+1. Log in as admin
+2. Go to Configuration → AI → AI Agents (FlowDrop)
+   - Or direct URL: `/admin/config/ai/flowdrop-ai/agents`
+3. Click "Edit in FlowDrop" for any agent
+4. Make changes in the visual editor
+5. Click "Save AI Agent" button
+
+---
+
+## Current Status & Known Issues
+
+### What Works
+- ✅ FlowDrop editor loads at `/admin/config/ai/flowdrop-ai/agents/{id}/edit`
+- ✅ Tools and Agents appear in sidebar (can be dragged)
+- ✅ Agent nodes and tool nodes display on canvas (not blank squares anymore)
+- ✅ API endpoints return FlowDrop-compatible node format
+
+### Known Issues (Next Phase Focus)
+1. **Node configuration panels not working** - Clicking on a node doesn't open config
+2. **Tools not visually connected to agents** - No edges drawn between agent and its tools
+3. **Save not fully working** - Need to wire up save to actually persist to AI Agent config
+
+### UI Data Format Understanding
+FlowDrop expects nodes in this format:
+```javascript
+{
+  id: 'node_id',
+  type: 'universalNode',
+  data: {
+    label: 'Node Label',
+    config: { /* node-specific config */ },
+    metadata: {
+      id: 'plugin_id',
+      name: 'Display Name',
+      executor_plugin: 'chat_model',
+      category: 'models',
+      type: 'agent',
+      supportedTypes: ['agent'],
+      icon: 'mdi:robot',
+      color: 'var(--color-ref-purple-500)',
+      inputs: [{ id, name, type, dataType, required, description }],
+      outputs: [{ id, name, type, dataType, required, description }]
+    }
+  },
+  position: { x: 300, y: 100 }
+}
+```
+
+---
+
+## Next Phase: Phase 5 - Node Configuration & Tool Connections
+
+### Phase 5 Objectives
+1. **Fix node configuration panels** - When clicking a node, show its config form
+2. **Connect tools to agents visually** - Draw edges from agent nodes to their tool nodes
+3. **Implement proper save workflow** - Save canvas state to AI Agent config entities
+4. **Add node config forms for agents** - System prompt, max loops, etc.
+
+### Key Areas to Investigate
+- How FlowDrop handles node selection and config panels
+- How to create edges programmatically when loading
+- The `@d34dman/flowdrop` library's node config API
+
+### Files That May Need Changes
+- `js/ai-agent-editor.js` - May need to handle node config events
+- `FlowDropAgentMapper.php` - May need to create edges between agents and tools
+- New: Node config form components (if FlowDrop supports custom forms)
+
+---
+
+## Future Phases
+
+### Phase 6 - Enhanced Node Types
+- Create custom node types for AI Agent configuration
+- Better visualization of tools attached to agents
+- Orchestration/triage agent visualization
+
+### Phase 7 - Full Integration
+- Execution testing from the editor
+- Real-time agent status/logs
+- Tool configuration within nodes
 
 ---
 
@@ -633,3 +782,5 @@ All API endpoints verified working:
 2. Phase 1 research complete - Added schema definitions and service interfaces
 3. Phase 2 complete - Implemented FlowDropAgentMapper, AgentRepository, and ToolDataProvider services
 4. Phase 3 complete - Added REST API endpoints for agents and tools
+5. Phase 4 complete - Added FlowDrop editor pages for AI Agents
+6. Phase 4 fixes - Fixed node format for FlowDrop compatibility, added agents to sidebar
