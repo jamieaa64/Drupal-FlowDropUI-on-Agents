@@ -31,3 +31,167 @@
   stroke: #f59e0b;
   stroke-dasharray: 5, 5;
 }
+
+/* View controls toolbar */
+.flowdrop-agents-view-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 0 12px;
+  margin-right: 8px;
+}
+
+.flowdrop-agents-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flowdrop-agents-control label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.flowdrop-agents-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.flowdrop-agents-select:hover {
+  border-color: #cbd5e1;
+}
+
+.flowdrop-agents-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Collapsed agent node badge */
+.flowdrop-agents-editor-container [data-node-type="agent-collapsed"] {
+  border-color: #a78bfa;
+  border-style: dashed;
+}
+
+.flowdrop-agents-editor-container [data-node-type="agent-collapsed"] .node-header {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+}
+
+/* Grouped agent container */
+.flowdrop-agents-editor-container .react-flow__node-group {
+  background: rgba(139, 92, 246, 0.08);
+  border: 2px dashed #a78bfa;
+  border-radius: 8px;
+  padding: 40px 10px 10px;
+}
+
+.flowdrop-agents-editor-container .react-flow__node-group[data-label]::before {
+  content: attr(data-label);
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+/* Assistant node styling */
+.flowdrop-agents-editor-container [data-node-type="assistant"] {
+  border-color: #14b8a6;
+}
+
+.flowdrop-agents-editor-container [data-node-type="assistant"] .node-header {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+/* Notification toast animations */
+@keyframes flowdrop-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes flowdrop-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Notification styling fallback (in case inline styles don't apply) */
+.flowdrop-notification {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Unsaved changes indicator */
+.flowdrop-unsaved-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  margin-right: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 4px;
+  animation: flowdrop-pulse 2s ease-in-out infinite;
+}
+
+.flowdrop-unsaved-dot {
+  width: 8px;
+  height: 8px;
+  background: #f59e0b;
+  border-radius: 50%;
+  animation: flowdrop-blink 1s ease-in-out infinite;
+}
+
+@keyframes flowdrop-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes flowdrop-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Highlight save button when unsaved */
+.flowdrop-btn-unsaved {
+  animation: flowdrop-pulse-btn 1.5s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4) !important;
+}
+
+@keyframes flowdrop-pulse-btn {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+  }
+}

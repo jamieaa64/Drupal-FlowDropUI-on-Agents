@@ -52,3 +52,42 @@ flowdrop_ui_agents.api.port_config:
   methods: [GET]
   options:
     no_cache: TRUE
+
+flowdrop_ui_agents.api.workflow:
+  path: '/api/flowdrop-agents/workflow/{agent_id}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\WorkflowController::getWorkflow'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    parameters:
+      agent_id:
+        type: string
+    no_cache: TRUE
+
+# Route for editing AI Assistants with FlowDrop
+flowdrop_ui_agents.assistant.edit:
+  path: '/admin/config/ai/ai-assistant/{ai_assistant}/edit-flowdrop'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\AssistantEditorController::edit'
+    _title_callback: '\Drupal\flowdrop_ui_agents\Controller\AssistantEditorController::editTitle'
+  requirements:
+    _permission: 'administer ai_assistant'
+  options:
+    parameters:
+      ai_assistant:
+        type: entity:ai_assistant
+
+# API Route for saving AI Assistants via FlowDrop
+flowdrop_ui_agents.api.assistant.save:
+  path: '/api/flowdrop-agents/assistant/{assistant_id}/save'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\AssistantSaveController::save'
+  requirements:
+    _permission: 'administer ai_assistant'
+  methods: [POST]
+  options:
+    parameters:
+      assistant_id:
+        type: string

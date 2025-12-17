@@ -4,6 +4,84 @@ Running history of investigations, findings, and notes from AI agent sessions.
 
 ---
 
+## 2024-12-17: Phase 7 Complete - Multi-Agent Visualization & Assistant Support
+
+### Summary
+Implemented multi-agent visualization with expansion modes (expanded/grouped/collapsed), added full AI Assistant support with dedicated FlowDrop editor, and fixed numerous save/load issues.
+
+### Key Features Implemented
+
+#### 1. Multi-Agent Visualization
+- **Expanded Mode**: Sub-agents show their full structure with tools inline
+- **Grouped Mode**: Sub-agents shown in visual containers (dashed borders)
+- **Collapsed Mode**: Sub-agents as single nodes with tool count badge
+- View mode selector in navbar allows switching between modes
+
+#### 2. AI Assistant Support
+Assistants are different from Agents - they wrap an Agent but have additional settings (LLM, history, roles). Created dedicated flow:
+
+**New Files:**
+- `src/Controller/AssistantEditorController.php` - Renders FlowDrop for Assistants
+- `src/Controller/Api/AssistantSaveController.php` - Saves both Assistant AND linked Agent
+- `src/Hook/EntityOperations.php` - Adds "Edit with FlowDrop" to Assistant dropdown
+
+**Routes Added:**
+- `GET /admin/config/ai/ai-assistant/{ai_assistant}/edit-flowdrop` - Assistant editor
+- `POST /api/flowdrop-agents/assistant/{assistant_id}/save` - Save endpoint
+
+**Assistant Node Type:**
+- `nodeType: 'assistant'` with teal color and `mdi:account-voice` icon
+- Config panel includes: LLM Provider, LLM Model, History settings, Instructions, Error Message
+- Only allows Agents and RAG as tools (not all function call tools)
+
+#### 3. Save Bug Fixes
+- **Wrong entity save bug**: Fixed by using edges to determine direct children, not just node types
+- **Expanded sub-agent tools leaking**: Fixed by only processing nodes directly connected FROM the main assistant/agent node
+- **Config extraction**: Node config now properly extracted from `node.data.config` (camelCase keys)
+
+#### 4. UX Improvements
+- **Save notifications**: Toast messages for success/error with auto-dismiss
+- **Unsaved changes indicator**: Amber badge in navbar + pulsing save button glow
+- **CSS for assistant nodes**: Teal gradient header
+
+### Technical Details
+
+#### Assistant vs Agent Save Flow
+```
+Assistant Editor
+     │
+     ├─→ AssistantEditorController::edit()
+     │      └─→ Converts agent workflow, injects assistantConfig
+     │      └─→ Changes main node to nodeType='assistant'
+     │
+     └─→ AssistantSaveController::save()
+            ├─→ findAssistantNodeConfig() - Gets config from assistant node
+            ├─→ updateAgent() - Uses EDGES to find direct children tools
+            └─→ updateAssistant() - Maps camelCase to snake_case fields
+```
+
+#### Edge-Based Tool Detection
+```php
+// Find direct children using edges, not node iteration
+$directChildNodeIds = [];
+foreach ($edges as $edge) {
+    if ($edge['source'] === $mainNodeId) {
+        $directChildNodeIds[] = $edge['target'];
+    }
+}
+// Only these nodes are the assistant's tools
+```
+
+### Files Modified
+- `src/Service/AgentWorkflowMapper.php` - Added expansion modes, position saving
+- `src/Service/WorkflowParser.php` - Fixed primary agent detection
+- `js/flowdrop-agents-editor.js` - Save notifications, unsaved indicator, change detection
+- `css/flowdrop-agents-editor.css` - Assistant styling, notification animations
+- `flowdrop_ui_agents.routing.yml` - Assistant routes
+- `flowdrop_ui_agents.services.yml` - EntityOperations service
+
+---
+
 ## 2024-12-17: Phase 6.5 Complete - API Endpoints & All Tools in Sidebar
 
 ### Summary

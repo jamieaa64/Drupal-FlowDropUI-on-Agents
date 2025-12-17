@@ -11,6 +11,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\flowdrop_ui_agents\Service\AgentWorkflowMapper;
 use Drupal\flowdrop_ui_agents\Service\WorkflowParser;
+use Drupal\modeler_api\Api;
 use Drupal\modeler_api\Attribute\Modeler;
 use Drupal\modeler_api\Component;
 use Drupal\modeler_api\Plugin\ModelerApiModelOwner\ModelOwnerInterface;
@@ -316,7 +317,26 @@ class FlowDropAgents extends ModelerBase {
    * {@inheritdoc}
    */
   public function readComponents(): array {
-    return $this->workflowParser()->toComponents($this->parsedData);
+    $components = $this->workflowParser()->toComponents($this->parsedData);
+
+    // Add SUBPROCESS components for sub-agents referenced in the workflow.
+    // The parser stores these in _subAgentTools during toComponents().
+    $subAgentTools = $this->parsedData['_subAgentTools'] ?? [];
+    foreach ($subAgentTools as $toolId) {
+      // Extract the agent ID from the tool ID (ai_agents::ai_agent::agent_id).
+      $subAgentId = str_replace('ai_agents::ai_agent::', '', $toolId);
+      $components[] = new Component(
+        $this->modelOwner,
+        $subAgentId,
+        Api::COMPONENT_TYPE_SUBPROCESS,
+        $subAgentId,
+        $subAgentId,
+        [],
+        [],
+      );
+    }
+
+    return $components;
   }
 
   /**

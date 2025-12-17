@@ -10,3 +10,10 @@ services:
     class: Drupal\flowdrop_ui_agents\Service\WorkflowParser
     arguments:
       - '@logger.factory'
+
+  Drupal\flowdrop_ui_agents\Hook\EntityOperations:
+    arguments:
+      - '@current_user'
+      - '@entity_type.manager'
+    tags:
+      - { name: drupal.hook_implementation }

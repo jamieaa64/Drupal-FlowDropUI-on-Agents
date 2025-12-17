@@ -5,7 +5,7 @@
 **IMPORTANT FOR FUTURE AGENTS**: This file documents the current branch's purpose, progress, and immediate next steps.
 
 - **Current Branch**: `main`
-- **Phase**: 6.5 Complete, Ready for Phase 7
+- **Phase**: 7 Complete, Ready for Phase 8
 - **For historical context**: See `CLAUDE-NOTES.md` and `CLAUDE-PLANNING.md`
 
 ---
@@ -13,73 +13,50 @@
 ## Current Status (2024-12-17)
 
 ### What's Working
-- FlowDrop visual editor loads for AI Agents
-- Sidebar shows ALL 108 tools + 5 agents (categorized)
-- Save functionality works via Modeler API
-- Tools use orange color, agents use purple
+- FlowDrop visual editor for **AI Agents** at `/admin/config/ai/agents/{agent}/edit_with/flowdrop_agents`
+- FlowDrop visual editor for **AI Assistants** at `/admin/config/ai/ai-assistant/{assistant}/edit-flowdrop`
+- Multi-agent visualization with 3 modes: Expanded, Grouped, Collapsed
+- Assistant node type with teal color, different icon, and assistant-specific settings
+- Save functionality for both Agents and Assistants
+- Save notifications (toast messages) for success/error
+- Unsaved changes indicator (amber badge + pulsing save button)
+- Sidebar shows ALL 108 tools + agents (categorized)
+- "Edit with FlowDrop for AI Agents" appears in dropdown for both Agents and Assistants
 
-### Test URL
-`/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
-
----
-
-## Known Issues (Next Phase)
-
-### Issue 1: Edge Lines Not Appearing on Load
-**Problem:** When loading an existing agent, the connecting lines between tools and agents don't render, even though edge data exists in the workflow.
-
-**Impact:** User can't see which tools are connected to which agent.
-
-**Same issue existed in flowdrop_ai_provider** - this is likely a FlowDrop rendering or handle ID mismatch issue.
-
-**To investigate:**
-1. Check browser console for edge-related errors
-2. Verify handle IDs match format: `${nodeId}-output-${portId}` / `${nodeId}-input-${portId}`
-3. Check if edges need to be added after initial render
-4. Compare with working FlowDrop workflow to find differences
-
-### Issue 2: Multi-Agent/Sub-Agent Display
-**Problem:** When an agent uses another agent as a tool (orchestration/triage pattern), we only show the wrapper - not the sub-agent's own tools.
-
-**Example scenario:**
-```
-Bundle Lister Assistant
-  └── Agent Bundle Tool (ai_agents::ai_agent::agent_bundle_lister)
-        └── This is actually an agent with its OWN tools!
-            ├── list_bundles
-            ├── get_entity_type_info
-            └── etc.
-```
-
-**Current behavior:** Shows "Agent Bundle Tool" as a single tool node
-**Expected behavior:** Should show sub-agent's structure or indicate it's an agent with nested tools
-
-**Possible solutions:**
-1. **Recursive expansion** - When tool ID starts with `ai_agents::ai_agent::`, expand to show its tools
-2. **Visual indicator** - Different icon/badge for "agent-as-tool" vs regular tools
-3. **Drill-down view** - Click to open sub-agent in nested view
-4. **Grouped nodes** - Show sub-agent as a group containing its tools
+### Test URLs
+- **Agent**: `/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
+- **Assistant**: `/admin/config/ai/ai-assistant/bundle_lister_assistant/edit-flowdrop`
 
 ---
 
-## Phase 7: Edge Rendering & Multi-Agent
+## Phase 8: Testing, Polish & New Features
 
-### Priority 1: Fix Edge Rendering
-1. Debug why edges don't appear on load
-2. Check handle ID generation in `AgentWorkflowMapper::createToolNode()`
-3. Verify edge data structure matches FlowDrop expectations
-4. Test with manually created edges in console
+### Priority 1: Testing & Edge Cases
+1. **Test editing agents within an assistant flow** - Ensure sub-agent changes save correctly
+2. **Test assistants with multiple sub-agents** - Verify all tools attach correctly
+3. **Opening an Agent attached to an Assistant** - Should redirect to open the Assistant instead (or show warning)
 
-### Priority 2: Multi-Agent Visual Representation
-1. Detect when a tool is actually an agent (`ai_agents::ai_agent::*`)
-2. Decide on UX approach (expand, badge, or drill-down)
-3. Update `agentToWorkflow()` to handle nested agents
-4. Consider recursive depth limits
+### Priority 2: New Node Types
+1. **Deepchat Chatbot node** - New node type that attaches to Assistants for chat UI integration
 
-### Priority 3: Cleanup
-1. Remove `flowdrop_ai_provider` module if no longer needed
-2. Export any new config
-3. Update documentation
+### Priority 3: UI/UX Improvements
+1. **Tool Drawer categories** - Match categories to Select Tools Widget for consistency
+2. **Node config panel ordering** - Match form field order/priorities (hide advanced features)
+3. **Prompt text boxes** - Full-screen editor for more space (may be out of scope)
+4. **Auto-attach on drag** - When dragging a tool onto an Agent, auto-connect and position nicely
+5. **Initial tool spacing** - Tools overlap on first load, need better default positioning
+
+### Priority 4: RAG Integration
+1. **RAG Search tools** - Add to sidebar and test functionality
+2. **Link to indexes** - RAG tools should connect to Search API indexes
+
+### Priority 5: Tool Config Improvements
+1. **Better tool configuration panel** - Improve UX of tool settings
+2. **Tool usage limits** - Expose in UI if not already
+
+### Priority 6: AI-Assisted Setup (Stretch Goal)
+1. **Create an AI Assistant** that helps users set up agents/assistants via the visual editor
+2. Would require meta-level prompting and understanding of the UI
 
 ---
 
@@ -92,17 +69,22 @@ web/modules/custom/flowdrop_ui_agents/
 ├── flowdrop_ui_agents.libraries.yml
 ├── flowdrop_ui_agents.routing.yml
 ├── src/
-│   ├── Controller/Api/
-│   │   └── NodesController.php       # Sidebar API (108 tools)
+│   ├── Controller/
+│   │   ├── AssistantEditorController.php   # NEW: Assistant FlowDrop editor
+│   │   └── Api/
+│   │       ├── NodesController.php         # Sidebar API (108 tools)
+│   │       └── AssistantSaveController.php # NEW: Assistant save endpoint
+│   ├── Hook/
+│   │   └── EntityOperations.php            # NEW: Dropdown menu items
 │   ├── Plugin/ModelerApiModeler/
-│   │   └── FlowDropAgents.php        # Modeler plugin
+│   │   └── FlowDropAgents.php              # Modeler plugin
 │   └── Service/
-│       ├── AgentWorkflowMapper.php   # AI Agent ↔ FlowDrop
-│       └── WorkflowParser.php        # JSON → Components
+│       ├── AgentWorkflowMapper.php         # AI Agent ↔ FlowDrop
+│       └── WorkflowParser.php              # JSON → Components
 ├── js/
-│   └── flowdrop-agents-editor.js
+│   └── flowdrop-agents-editor.js           # Notifications, unsaved indicator
 └── css/
-    └── flowdrop-agents-editor.css
+    └── flowdrop-agents-editor.css          # Assistant styling, animations
 ```
 
 ---
@@ -113,35 +95,45 @@ web/modules/custom/flowdrop_ui_agents/
 - `GET /api/flowdrop-agents/nodes` - All tools + agents
 - `GET /api/flowdrop-agents/nodes/by-category` - Grouped
 - `GET /api/flowdrop-agents/nodes/{id}/metadata` - Single node
+- `POST /api/flowdrop-agents/assistant/{id}/save` - Save assistant + agent
 
-### Handle ID Format (for edges)
-```
-Input:  ${nodeId}-input-${portId}
-Output: ${nodeId}-output-${portId}
-```
+### Node Types
+| Type | Color | Icon | Description |
+|------|-------|------|-------------|
+| `agent` | Purple | `mdi:robot` | AI Agent (main or sub-agent) |
+| `assistant` | Teal | `mdi:account-voice` | AI Assistant (wraps agent) |
+| `agent-collapsed` | Light purple (dashed) | `mdi:robot-outline` | Collapsed sub-agent |
+| `tool` | Orange | `mdi:tools` | Function call tool |
 
-### Tool ID Formats
-- Regular tools: `ai_agent:tool_name` or `tool:tool_name`
-- Agent-as-tool: `ai_agents::ai_agent::agent_id` (double colons)
+### Assistant vs Agent
+- **Agent**: Core entity with tools, system prompt, max loops
+- **Assistant**: Wrapper around Agent that adds: LLM provider/model, history settings, roles, error message
+- When editing Assistant, changes save to BOTH entities
 
 ---
 
 ## For Next Agent
 
 ```
-Continue with Phase 7 - Edge Rendering & Multi-Agent
+Continue with Phase 8 - Testing, Polish & New Features
 
-ISSUE 1: Edge lines don't appear when loading agents
-- Check handle ID format in AgentWorkflowMapper
-- Debug in browser console
-- Compare with working FlowDrop workflows
+IMMEDIATE TESTING NEEDED:
+1. Edit agents within an assistant flow - do changes save correctly?
+2. Test assistants with multiple sub-agents
+3. What happens when opening an Agent that belongs to an Assistant?
 
-ISSUE 2: Sub-agents not shown with their tools
-- Detect ai_agents::ai_agent::* tool IDs
-- Decide on visual approach
-- Update agentToWorkflow() for nested structure
+NEW FEATURES TO ADD:
+1. Deepchat Chatbot node type for Assistants
+2. RAG Search tools integration
+3. Auto-attach tools when dragged onto agent
+4. Better initial tool spacing/positioning
+5. Full-screen prompt editor
+6. Category matching with Select Tools Widget
 
-TEST URL: /admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents
+TEST URLS:
+- Agent: /admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents
+- Assistant: /admin/config/ai/ai-assistant/bundle_lister_assistant/edit-flowdrop
+
 MODULE: web/modules/custom/flowdrop_ui_agents/
 ```
 

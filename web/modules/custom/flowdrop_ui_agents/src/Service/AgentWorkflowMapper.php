@@ -72,43 +72,88 @@ class AgentWorkflowMapper {
   ) {}
 
   /**
+   * Layout constants for node positioning.
+   */
+  protected const LAYOUT = [
+    'agentX' => 100,           // Main agent starts at left
+    'agentY' => 150,           // Vertical center-ish
+    'toolOffsetX' => 350,      // Tools are 350px to the right of their agent
+    'toolSpacingY' => 120,     // Vertical spacing between tools
+    'subAgentOffsetX' => 700,  // Sub-agents further right
+    'nodeWidth' => 250,        // Approximate node width for calculations
+  ];
+
+  /**
    * Converts an AI Agent entity to FlowDrop workflow format.
    *
    * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $agent
    *   The AI Agent entity.
+   * @param string $expansionMode
+   *   How to display sub-agents: 'expanded', 'grouped', or 'collapsed'.
+   * @param int $depth
+   *   Current recursion depth (internal use).
+   * @param int $maxDepth
+   *   Maximum recursion depth to prevent infinite loops.
    *
    * @return array
    *   FlowDrop workflow data structure.
    */
-  public function agentToWorkflow(ConfigEntityInterface $agent): array {
+  public function agentToWorkflow(ConfigEntityInterface $agent, string $expansionMode = 'expanded', int $depth = 0, int $maxDepth = 3): array {
     assert($agent instanceof AiAgent);
 
     $nodes = [];
     $edges = [];
+    $savedPositions = $this->loadPositions($agent);
+
+    // Calculate base X position based on depth (main agent at left, sub-agents to right)
+    $baseX = self::LAYOUT['agentX'] + ($depth * self::LAYOUT['subAgentOffsetX']);
+    $baseY = self::LAYOUT['agentY'];
 
     // Create the main agent node.
     $agentNodeId = 'agent_' . $agent->id();
-    $nodes[] = $this->createAgentNode($agent, $agentNodeId);
+    $agentNode = $this->createAgentNode($agent, $agentNodeId);
+    $agentNode['data']['metadata']['ownerAgentId'] = $agent->id();
+
+    // Use saved position or calculate default
+    $agentNode['position'] = $savedPositions[$agentNodeId] ?? ['x' => $baseX, 'y' => $baseY];
+    $nodes[] = $agentNode;
 
     // Get tools and create tool nodes.
     $tools = $agent->get('tools') ?? [];
     $toolSettings = $agent->get('tool_settings') ?? [];
-    $positions = $this->loadPositions($agent);
 
-    $toolIndex = 0;
+    // Separate regular tools from sub-agents for positioning
+    $regularTools = [];
+    $subAgents = [];
+
     foreach ($tools as $toolId => $enabled) {
       if (!$enabled) {
         continue;
       }
+      if (str_starts_with($toolId, 'ai_agents::ai_agent::')) {
+        $subAgents[] = $toolId;
+      }
+      else {
+        $regularTools[] = $toolId;
+      }
+    }
 
-      $toolNodeId = 'tool_' . $toolIndex;
-      $toolNode = $this->createToolNode($toolId, $toolNodeId, $toolSettings[$toolId] ?? [], $positions[$toolNodeId] ?? NULL, $toolIndex);
+    // Position regular tools to the right of the agent, stacked vertically
+    $toolX = $baseX + self::LAYOUT['toolOffsetX'];
+    $toolY = $baseY - ((count($regularTools) - 1) * self::LAYOUT['toolSpacingY'] / 2);
+
+    $toolIndex = 0;
+    foreach ($regularTools as $toolId) {
+      $toolNodeId = 'tool_' . $agent->id() . '_' . $toolIndex;
+      $toolPosition = $savedPositions[$toolNodeId] ?? ['x' => $toolX, 'y' => $toolY];
+
+      $toolNode = $this->createToolNode($toolId, $toolNodeId, $toolSettings[$toolId] ?? [], $toolPosition, $toolIndex);
 
       if ($toolNode) {
+        $toolNode['data']['metadata']['ownerAgentId'] = $agent->id();
         $nodes[] = $toolNode;
 
-        // Create edge from agent to tool (agent connects to tool).
-        // FlowDrop expects: source=agent, target=tool, sourceHandle={agent}-output-tools, targetHandle={tool}-input-tool
+        // Create edge from agent to tool
         $edges[] = [
           'id' => "edge_{$agentNodeId}_to_{$toolNodeId}",
           'source' => $agentNodeId,
@@ -116,18 +161,59 @@ class AgentWorkflowMapper {
           'sourceHandle' => "{$agentNodeId}-output-tools",
           'targetHandle' => "{$toolNodeId}-input-tool",
           'type' => 'default',
-          'data' => [
-            'dataType' => 'tool',
-          ],
+          'data' => ['dataType' => 'tool'],
         ];
       }
 
+      $toolY += self::LAYOUT['toolSpacingY'];
       $toolIndex++;
     }
 
-    // Load positions for agent node if saved.
-    if (isset($positions[$agentNodeId])) {
-      $nodes[0]['position'] = $positions[$agentNodeId];
+    // Position sub-agents further to the right
+    $subAgentIndex = 0;
+    foreach ($subAgents as $toolId) {
+      $subAgentId = str_replace('ai_agents::ai_agent::', '', $toolId);
+
+      if ($expansionMode === 'collapsed' || $depth >= $maxDepth) {
+        // Collapsed mode: show as single node with badge
+        $subAgentNodeId = 'subagent_' . $subAgentId;
+        $subAgentY = $baseY + ($subAgentIndex * self::LAYOUT['toolSpacingY']);
+        $subAgentPosition = $savedPositions[$subAgentNodeId] ?? [
+          'x' => $baseX + self::LAYOUT['subAgentOffsetX'],
+          'y' => $subAgentY,
+        ];
+
+        $collapsedNode = $this->createCollapsedAgentNode($subAgentId, $subAgentNodeId, $subAgentPosition, $subAgentIndex);
+        if ($collapsedNode) {
+          $collapsedNode['data']['metadata']['ownerAgentId'] = $agent->id();
+          $nodes[] = $collapsedNode;
+
+          // Create edge from parent agent to collapsed sub-agent
+          $edges[] = [
+            'id' => "edge_{$agentNodeId}_to_{$subAgentNodeId}",
+            'source' => $agentNodeId,
+            'target' => $subAgentNodeId,
+            'sourceHandle' => "{$agentNodeId}-output-tools",
+            'targetHandle' => "{$subAgentNodeId}-input-tool",
+            'type' => 'default',
+            'data' => ['dataType' => 'agent'],
+          ];
+        }
+      }
+      elseif ($expansionMode === 'grouped') {
+        // Grouped mode: show sub-agent in a visual container
+        $subAgentData = $this->loadSubAgentGrouped($subAgentId, $agentNodeId, $depth + 1, $maxDepth, $savedPositions);
+        $nodes = array_merge($nodes, $subAgentData['nodes']);
+        $edges = array_merge($edges, $subAgentData['edges']);
+      }
+      else {
+        // Expanded mode: recursively load sub-agent
+        $subAgentData = $this->loadSubAgentExpanded($subAgentId, $agentNodeId, $expansionMode, $depth + 1, $maxDepth, $savedPositions);
+        $nodes = array_merge($nodes, $subAgentData['nodes']);
+        $edges = array_merge($edges, $subAgentData['edges']);
+      }
+
+      $subAgentIndex++;
     }
 
     return [
@@ -143,18 +229,182 @@ class AgentWorkflowMapper {
           'orchestration_agent' => $agent->get('orchestration_agent') ?? FALSE,
           'triage_agent' => $agent->get('triage_agent') ?? FALSE,
         ],
+        'expansionMode' => $expansionMode,
+      ],
+    ];
+  }
+
+  /**
+   * Loads a sub-agent in expanded mode (flat hierarchy).
+   */
+  protected function loadSubAgentExpanded(string $subAgentId, string $parentNodeId, string $expansionMode, int $depth, int $maxDepth, array $positions): array {
+    $storage = $this->entityTypeManager->getStorage('ai_agent');
+    $subAgent = $storage->load($subAgentId);
+
+    if (!$subAgent) {
+      return ['nodes' => [], 'edges' => []];
+    }
+
+    // Recursively get sub-agent workflow
+    $subWorkflow = $this->agentToWorkflow($subAgent, $expansionMode, $depth, $maxDepth);
+
+    // Create edge from parent to sub-agent
+    $subAgentNodeId = 'agent_' . $subAgentId;
+    $edges = $subWorkflow['edges'];
+    $edges[] = [
+      'id' => "edge_{$parentNodeId}_to_{$subAgentNodeId}",
+      'source' => $parentNodeId,
+      'target' => $subAgentNodeId,
+      'sourceHandle' => "{$parentNodeId}-output-tools",
+      'targetHandle' => "{$subAgentNodeId}-input-trigger",
+      'type' => 'default',
+      'data' => ['dataType' => 'agent'],
+    ];
+
+    return [
+      'nodes' => $subWorkflow['nodes'],
+      'edges' => $edges,
+    ];
+  }
+
+  /**
+   * Loads a sub-agent in grouped mode (visual container).
+   */
+  protected function loadSubAgentGrouped(string $subAgentId, string $parentNodeId, int $depth, int $maxDepth, array $positions): array {
+    $storage = $this->entityTypeManager->getStorage('ai_agent');
+    $subAgent = $storage->load($subAgentId);
+
+    if (!$subAgent) {
+      return ['nodes' => [], 'edges' => []];
+    }
+
+    // Get sub-agent workflow in expanded mode first
+    $subWorkflow = $this->agentToWorkflow($subAgent, 'grouped', $depth, $maxDepth);
+
+    // Calculate group position based on depth
+    $groupX = self::LAYOUT['agentX'] + ($depth * self::LAYOUT['subAgentOffsetX']);
+    $groupY = self::LAYOUT['agentY'] - 50;  // Slightly above to account for padding
+
+    // Create group container node
+    $groupNodeId = 'group_' . $subAgentId;
+    $groupNode = [
+      'id' => $groupNodeId,
+      'type' => 'group',
+      'position' => $positions[$groupNodeId] ?? ['x' => $groupX, 'y' => $groupY],
+      'data' => [
+        'label' => $subAgent->label(),
+      ],
+      'style' => [
+        'width' => 600,
+        'height' => 350,
+      ],
+    ];
+
+    // Add parentId to all sub-agent nodes for visual grouping
+    foreach ($subWorkflow['nodes'] as &$node) {
+      $node['parentId'] = $groupNodeId;
+      $node['extent'] = 'parent';
+    }
+
+    // Prepend group node
+    array_unshift($subWorkflow['nodes'], $groupNode);
+
+    // Create edge from parent to group
+    $edges = $subWorkflow['edges'];
+    $edges[] = [
+      'id' => "edge_{$parentNodeId}_to_{$groupNodeId}",
+      'source' => $parentNodeId,
+      'target' => $groupNodeId,
+      'sourceHandle' => "{$parentNodeId}-output-tools",
+      'targetHandle' => "{$groupNodeId}-input-trigger",
+      'type' => 'default',
+      'data' => ['dataType' => 'agent'],
+    ];
+
+    return [
+      'nodes' => $subWorkflow['nodes'],
+      'edges' => $edges,
+    ];
+  }
+
+  /**
+   * Creates a collapsed agent node (single node with badge).
+   */
+  protected function createCollapsedAgentNode(string $subAgentId, string $nodeId, ?array $position, int $index): ?array {
+    $storage = $this->entityTypeManager->getStorage('ai_agent');
+    $subAgent = $storage->load($subAgentId);
+
+    if (!$subAgent) {
+      return NULL;
+    }
+
+    // Count tools in sub-agent
+    $tools = $subAgent->get('tools') ?? [];
+    $toolCount = count(array_filter($tools));
+
+    // Calculate default position if not provided
+    if ($position === NULL) {
+      $position = [
+        'x' => 100,
+        'y' => 100 + ($index * 100),
+      ];
+    }
+
+    return [
+      'id' => $nodeId,
+      'type' => 'universalNode',
+      'position' => $position,
+      'data' => [
+        'nodeId' => $nodeId,
+        'label' => $subAgent->label() . " [{$toolCount} tools]",
+        'nodeType' => 'agent-collapsed',
+        'config' => [
+          'agent_id' => $subAgentId,
+          'tool_count' => $toolCount,
+        ],
+        'metadata' => [
+          'id' => 'ai_agents::ai_agent::' . $subAgentId,
+          'name' => $subAgent->label(),
+          'description' => $subAgent->get('description') ?? '',
+          'isCollapsedAgent' => TRUE,
+          'type' => 'agent',
+          'supportedTypes' => ['agent', 'simple', 'default'],
+          'icon' => 'mdi:robot-outline',
+          'color' => 'var(--color-ref-purple-300)',
+          'inputs' => [
+            [
+              'id' => 'tool',
+              'name' => 'Tool',
+              'type' => 'input',
+              'dataType' => 'tool',
+              'required' => FALSE,
+              'description' => 'Tool connection from parent agent',
+            ],
+          ],
+          'outputs' => [
+            [
+              'id' => 'tool',
+              'name' => 'Tool',
+              'type' => 'output',
+              'dataType' => 'tool',
+              'required' => FALSE,
+              'description' => 'Tool output',
+            ],
+          ],
+        ],
       ],
     ];
   }
 
   /**
    * Creates a FlowDrop node for the main agent.
+   * Note: Position is set by the caller, not here.
    */
   protected function createAgentNode(AiAgent $agent, string $nodeId): array {
     return [
       'id' => $nodeId,
       'type' => 'universalNode',
-      'position' => ['x' => 400, 'y' => 100],
+      'position' => ['x' => 0, 'y' => 0],  // Will be overridden by caller
       'data' => [
         'nodeId' => $nodeId,
         'label' => $agent->label(),
@@ -171,7 +421,7 @@ class AgentWorkflowMapper {
           'id' => 'ai_agent',
           'name' => 'AI Agent',
           'type' => 'agent',
-          'supportedTypes' => ['agent'],
+          'supportedTypes' => ['agent', 'simple', 'default'],
           'category' => 'agents',
           'icon' => 'mdi:robot',
           'color' => 'var(--color-ref-purple-500)',
@@ -269,7 +519,7 @@ class AgentWorkflowMapper {
             'name' => $label,
             'description' => $description,
             'type' => 'tool',
-            'supportedTypes' => ['tool'],
+            'supportedTypes' => ['tool', 'simple', 'default'],
             'category' => $this->transformCategoryToPlural($category),
             'icon' => 'mdi:tools',
             'color' => $this->getCategoryColor($category),

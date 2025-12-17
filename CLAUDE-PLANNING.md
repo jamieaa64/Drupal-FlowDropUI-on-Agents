@@ -516,3 +516,37 @@ a6004b3 Phase 3: Add REST API endpoints for FlowDrop AI integration
 46247d6 Add CLAUDE-NOTES.md with investigation findings
 6c4147e Phase 1: Research complete + add contrib modules for patching
 ```
+
+---
+
+## 11. Future Work (Parked)
+
+### Layout Toggle for Compact/Normal Nodes
+
+**Status:** Parked - requires FlowDrop modifications
+
+**Problem:** FlowDrop's node type system requires `metadata.supportedTypes` to include the target type (e.g., "simple") for a node to render differently. Our agent and tool nodes only declare `supportedTypes: ['agent']` or `supportedTypes: ['tool']`, so changing `config.nodeType` to "simple" has no effect.
+
+**Investigation findings:**
+- FlowDrop uses `resolveNodeType()` which checks if `configNodeType` is in `metadata.supportedTypes`
+- If not found, it falls back to the primary type
+- The `layout` property inside SimpleNode only affects compact/normal variants within that specific component
+- To enable layout switching, nodes need `supportedTypes: ['simple', 'agent']` or similar
+
+**Solutions (to be evaluated):**
+1. **Update AgentWorkflowMapper** - Add "simple" to `supportedTypes` array in node metadata
+2. **Patch FlowDrop** - Allow any nodeType regardless of supportedTypes
+3. **Custom CSS approach** - Use CSS classes to toggle node appearance without changing nodeType
+
+**Files involved:**
+- `js/flowdrop-agents-editor.js` - JS toggle code (removed for now)
+- `src/Service/AgentWorkflowMapper.php` - Node metadata generation
+- FlowDrop: `flowdrop.es.js` lines 21738-21756 (`getAvailableNodeTypes`, `resolveNodeType`)
+
+### Port Config Warning
+
+**Status:** Low priority - cosmetic issue
+
+The warning "Invalid port config received from API, using default" appears because FlowDrop fetches `/api/flowdrop-agents/port-config` on init. The endpoint works but returns in a format FlowDrop doesn't recognize as valid. FlowDrop falls back to defaults which work fine.
+
+**To fix:** Compare our port-config response format with FlowDrop's expected `validatePortConfig()` requirements.
