@@ -43,15 +43,15 @@
           },
         };
 
-        // Create endpoint configuration using standard FlowDrop API.
-        // We use the existing /api/flowdrop endpoints for node types and port config.
+        // Create endpoint configuration for FlowDrop Agents API.
+        // Uses our custom endpoints that return AI tools, agents, and assistants.
         const endpointConfig = {
-          baseUrl: '/api/flowdrop',
+          baseUrl: '/api/flowdrop-agents',
           endpoints: {
             nodes: {
               list: '/nodes',
-              get: '/nodes/{id}',
-              byCategory: '/nodes/{category}',
+              get: '/nodes/{id}/metadata',
+              byCategory: '/nodes/by-category',
               metadata: '/nodes/{id}/metadata',
             },
             workflows: {
@@ -64,6 +64,7 @@
               export: '/workflows/{id}',
               import: '/workflows',
             },
+            portConfig: '/port-config',
           },
           timeout: 30000,
           headers: {

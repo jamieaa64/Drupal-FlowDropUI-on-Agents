@@ -6,9 +6,12 @@ namespace Drupal\flowdrop_ui_agents\Service;
 
 use Drupal\ai\Service\FunctionCalling\FunctionCallPluginManager;
 use Drupal\ai_agents\Entity\AiAgent;
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\modeler_api\Api;
 use Drupal\modeler_api\Plugin\ModelerApiModelOwner\ModelOwnerInterface;
 
@@ -20,6 +23,44 @@ use Drupal\modeler_api\Plugin\ModelerApiModelOwner\ModelOwnerInterface;
  * - SAVE: FlowDrop workflow -> AI Agent config updates
  */
 class AgentWorkflowMapper {
+
+  /**
+   * Category to plural form mapping.
+   */
+  protected const CATEGORY_PLURAL_MAP = [
+    'trigger' => 'triggers',
+    'input' => 'inputs',
+    'output' => 'outputs',
+    'model' => 'models',
+    'prompt' => 'prompts',
+    'processing' => 'processing',
+    'logic' => 'logic',
+    'data' => 'data',
+    'helper' => 'helpers',
+    'tool' => 'tools',
+    'vectorstore' => 'vectorstores',
+    'embedding' => 'embeddings',
+    'memory' => 'memories',
+    'agent' => 'agents',
+    'bundle' => 'bundles',
+    'General' => 'tools',
+  ];
+
+  /**
+   * Category color mapping.
+   */
+  protected const CATEGORY_COLORS = [
+    'trigger' => 'var(--color-ref-red-500)',
+    'input' => 'var(--color-ref-blue-500)',
+    'output' => 'var(--color-ref-green-500)',
+    'model' => 'var(--color-ref-purple-500)',
+    'tool' => 'var(--color-ref-orange-500)',
+    'agent' => 'var(--color-ref-cyan-500)',
+    'General' => 'var(--color-ref-gray-500)',
+    'Search' => 'var(--color-ref-blue-500)',
+    'Content' => 'var(--color-ref-green-500)',
+    'User' => 'var(--color-ref-purple-500)',
+  ];
 
   /**
    * Constructs the AgentWorkflowMapper service.
@@ -128,14 +169,34 @@ class AgentWorkflowMapper {
         'metadata' => [
           'id' => 'ai_agent',
           'name' => 'AI Agent',
+          'type' => 'agent',
+          'supportedTypes' => ['agent'],
           'category' => 'agents',
-          'color' => '#3b82f6',
+          'icon' => 'mdi:robot',
+          'color' => 'var(--color-ref-purple-500)',
           'inputs' => [
+            [
+              'id' => 'trigger',
+              'name' => 'Trigger',
+              'type' => 'input',
+              'dataType' => 'trigger',
+              'required' => FALSE,
+              'description' => 'Trigger input',
+            ],
+            [
+              'id' => 'message',
+              'name' => 'Message',
+              'type' => 'input',
+              'dataType' => 'string',
+              'required' => FALSE,
+              'description' => 'Input message',
+            ],
             [
               'id' => 'tools',
               'name' => 'Tools',
               'type' => 'input',
               'dataType' => 'tool',
+              'required' => FALSE,
               'description' => 'Tools available to this agent',
             ],
           ],
@@ -145,7 +206,16 @@ class AgentWorkflowMapper {
               'name' => 'Response',
               'type' => 'output',
               'dataType' => 'string',
+              'required' => FALSE,
               'description' => 'Agent response output',
+            ],
+            [
+              'id' => 'tools',
+              'name' => 'Tools',
+              'type' => 'output',
+              'dataType' => 'tool',
+              'required' => FALSE,
+              'description' => 'Tools output for chaining',
             ],
           ],
           'configSchema' => $this->getAgentConfigSchema(),
@@ -165,12 +235,13 @@ class AgentWorkflowMapper {
       // Cast to string to handle TranslatableMarkup objects.
       $label = (string) ($definition['label'] ?? $definition['name'] ?? $toolId);
       $description = (string) ($definition['description'] ?? '');
+      $category = $this->getToolCategory($toolId);
 
       // Calculate default position if not provided.
       if ($position === NULL) {
         $position = [
           'x' => 100,
-          'y' => 100 + ($index * 120),
+          'y' => 100 + ($index * 100),
         ];
       }
 
@@ -184,29 +255,45 @@ class AgentWorkflowMapper {
           'nodeType' => 'tool',
           'toolId' => $toolId,
           'config' => [
-            'toolId' => $toolId,
+            'tool_id' => $toolId,
             'label' => $label,
-            'returnDirectly' => $settings['return_directly'] ?? FALSE,
-            'requireUsage' => $settings['require_usage'] ?? FALSE,
-            'descriptionOverride' => $settings['description_override'] ?? '',
+            'return_directly' => $settings['return_directly'] ?? FALSE,
+            'require_usage' => $settings['require_usage'] ?? FALSE,
+            'use_artifacts' => $settings['use_artifacts'] ?? FALSE,
+            'description_override' => $settings['description_override'] ?? '',
+            'progress_message' => $settings['progress_message'] ?? '',
           ],
           'metadata' => [
             'id' => $toolId,
             'name' => $label,
             'description' => $description,
-            'category' => 'tools',
-            'color' => '#f59e0b',
-            'inputs' => [],
-            'outputs' => [
+            'type' => 'tool',
+            'supportedTypes' => ['tool'],
+            'category' => $this->transformCategoryToPlural($category),
+            'icon' => 'mdi:tools',
+            'color' => $this->getCategoryColor($category),
+            'tool_id' => $toolId,
+            'inputs' => [
               [
-                'id' => 'capability',
-                'name' => 'Capability',
-                'type' => 'output',
+                'id' => 'tool',
+                'name' => 'Tool',
+                'type' => 'input',
                 'dataType' => 'tool',
-                'description' => 'Tool capability for agent',
+                'required' => FALSE,
+                'description' => 'Tool connection from agent',
               ],
             ],
-            'configSchema' => $this->getToolConfigSchema(),
+            'outputs' => [
+              [
+                'id' => 'tool',
+                'name' => 'Tool',
+                'type' => 'output',
+                'dataType' => 'tool',
+                'required' => FALSE,
+                'description' => 'Tool output',
+              ],
+            ],
+            'configSchema' => $this->getToolConfigSchema($toolId),
           ],
         ],
       ];
@@ -222,6 +309,9 @@ class AgentWorkflowMapper {
 
   /**
    * Gets available tools for the sidebar.
+   *
+   * Returns tools in FlowDrop node format so they can be dragged directly
+   * onto the canvas.
    */
   public function getAvailableTools(ModelOwnerInterface $owner): array {
     $tools = [];
@@ -236,34 +326,154 @@ class AgentWorkflowMapper {
       }
 
       // Cast to string to handle TranslatableMarkup objects.
-      $name = $definition['label'] ?? $definition['name'] ?? $id;
-      $description = $definition['description'] ?? '';
+      $label = (string) ($definition['label'] ?? $definition['name'] ?? $id);
+      $description = (string) ($definition['description'] ?? '');
+      $category = $this->getToolCategory($id);
+
+      // Get tool-specific config schema.
+      $configSchema = $this->getToolSettingsSchema($id);
 
       $tools[] = [
         'id' => $id,
-        'name' => (string) $name,
-        'description' => (string) $description,
-        'category' => $this->getToolCategory($id),
+        'name' => $label,
         'type' => 'tool',
-        'color' => '#f59e0b',
-        'metadata' => [
-          'pluginId' => $id,
-          'nodeType' => 'tool',
+        'supportedTypes' => ['tool'],
+        'description' => $description,
+        'category' => $this->transformCategoryToPlural($category),
+        'icon' => 'mdi:tools',
+        'color' => $this->getCategoryColor($category),
+        'version' => '1.0.0',
+        'enabled' => TRUE,
+        'tags' => [$category],
+        'executor_plugin' => 'tool:' . $id,
+        'tool_id' => $id,
+        'inputs' => [
+          [
+            'id' => 'tool',
+            'name' => 'Tool',
+            'type' => 'input',
+            'dataType' => 'tool',
+            'required' => FALSE,
+            'description' => 'Tool connection from agent',
+          ],
         ],
+        'outputs' => [
+          [
+            'id' => 'tool',
+            'name' => 'Tool',
+            'type' => 'output',
+            'dataType' => 'tool',
+            'required' => FALSE,
+            'description' => 'Tool output',
+          ],
+        ],
+        'config' => [],
+        'configSchema' => $configSchema,
+      ];
+    }
+
+    // Sort by category then name.
+    usort($tools, function ($a, $b) {
+      $categoryCompare = strcmp($a['category'], $b['category']);
+      return $categoryCompare !== 0 ? $categoryCompare : strcmp($a['name'], $b['name']);
+    });
+
+    return $tools;
+  }
+
+  /**
+   * Gets available agents for the sidebar (other than current).
+   */
+  public function getAvailableAgents(ModelOwnerInterface $owner): array {
+    $agents = [];
+    $storage = $this->entityTypeManager->getStorage('ai_agent');
+    $allAgents = $storage->loadMultiple();
+
+    foreach ($allAgents as $agent) {
+      $agentId = $agent->id();
+      $label = $agent->label();
+      $description = $agent->get('description') ?? '';
+
+      $agents[] = [
+        'id' => 'ai_agent_' . $agentId,
+        'name' => $label,
+        'type' => 'agent',
+        'supportedTypes' => ['agent'],
+        'description' => $description,
+        'category' => 'agents',
+        'icon' => 'mdi:robot',
+        'color' => 'var(--color-ref-purple-500)',
+        'version' => '1.0.0',
+        'enabled' => TRUE,
+        'tags' => ['agent'],
+        'executor_plugin' => 'ai_agents::ai_agent::' . $agentId,
+        'agent_id' => $agentId,
+        'tool_id' => 'ai_agents::ai_agent::' . $agentId,
+        'inputs' => [
+          [
+            'id' => 'trigger',
+            'name' => 'Trigger',
+            'type' => 'input',
+            'dataType' => 'trigger',
+            'required' => FALSE,
+            'description' => 'Trigger input',
+          ],
+          [
+            'id' => 'message',
+            'name' => 'Message',
+            'type' => 'input',
+            'dataType' => 'string',
+            'required' => FALSE,
+            'description' => 'Input message',
+          ],
+        ],
+        'outputs' => [
+          [
+            'id' => 'response',
+            'name' => 'Response',
+            'type' => 'output',
+            'dataType' => 'string',
+            'required' => FALSE,
+            'description' => 'Agent response',
+          ],
+        ],
+        'config' => [],
+        'configSchema' => $this->getAgentConfigSchema(),
       ];
     }
 
     // Sort by name.
-    usort($tools, fn($a, $b) => strcasecmp((string) $a['name'], (string) $b['name']));
+    usort($agents, fn($a, $b) => strcmp($a['name'], $b['name']));
 
-    return $tools;
+    return $agents;
+  }
+
+  /**
+   * Gets tools grouped by category for sidebar display.
+   */
+  public function getToolsByCategory(ModelOwnerInterface $owner): array {
+    $tools = $this->getAvailableTools($owner);
+    $grouped = [];
+
+    foreach ($tools as $tool) {
+      $category = $tool['category'];
+      if (!isset($grouped[$category])) {
+        $grouped[$category] = [];
+      }
+      $grouped[$category][] = $tool;
+    }
+
+    // Sort categories alphabetically.
+    ksort($grouped);
+
+    return $grouped;
   }
 
   /**
    * Determines the category for a tool based on its ID.
    */
   protected function getToolCategory(string $toolId): string {
-    // Extract category from tool ID prefix.
+    // Check for known tool prefixes first.
     if (str_starts_with($toolId, 'ai_agent:')) {
       $toolName = substr($toolId, 9);
       if (str_contains($toolName, 'content')) {
@@ -276,7 +486,38 @@ class AgentWorkflowMapper {
         return 'Search';
       }
     }
+
+    // Try to get category from plugin definition.
+    try {
+      $plugin = $this->functionCallPluginManager->createInstance($toolId);
+      $definition = $plugin->getPluginDefinition();
+      if (!empty($definition['category'])) {
+        return (string) $definition['category'];
+      }
+    }
+    catch (\Exception $e) {
+      // Fall through to default.
+    }
+
     return 'General';
+  }
+
+  /**
+   * Transforms singular category to plural form for FlowDrop API.
+   */
+  protected function transformCategoryToPlural(string $category): string {
+    return self::CATEGORY_PLURAL_MAP[$category]
+      ?? self::CATEGORY_PLURAL_MAP[strtolower($category)]
+      ?? strtolower($category) . 's';
+  }
+
+  /**
+   * Gets CSS color for a category.
+   */
+  protected function getCategoryColor(string $category): string {
+    return self::CATEGORY_COLORS[$category]
+      ?? self::CATEGORY_COLORS[strtolower($category)]
+      ?? 'var(--color-ref-orange-500)';
   }
 
   /**
@@ -327,30 +568,219 @@ class AgentWorkflowMapper {
 
   /**
    * Returns JSON Schema for tool node configuration.
+   *
+   * @param string $toolId
+   *   Optional tool ID for plugin-specific config.
    */
-  protected function getToolConfigSchema(): array {
-    return [
-      'type' => 'object',
-      'properties' => [
-        'returnDirectly' => [
-          'type' => 'boolean',
-          'title' => 'Return Directly',
-          'description' => 'Return tool result directly without LLM processing',
-          'default' => FALSE,
-        ],
-        'requireUsage' => [
-          'type' => 'boolean',
-          'title' => 'Require Usage',
-          'description' => 'Agent must use this tool at least once',
-          'default' => FALSE,
-        ],
-        'descriptionOverride' => [
-          'type' => 'string',
-          'title' => 'Description Override',
-          'description' => 'Custom description for this tool (overrides default)',
-        ],
+  protected function getToolConfigSchema(string $toolId = ''): array {
+    $properties = [
+      'tool_id' => [
+        'type' => 'string',
+        'title' => 'Tool ID',
+        'description' => 'The tool plugin ID (read-only)',
+        'default' => $toolId,
+        'format' => 'hidden',
+      ],
+      'return_directly' => [
+        'type' => 'boolean',
+        'title' => 'Return Directly',
+        'description' => 'Return tool result directly without LLM rewriting. Use for API responses or structured output.',
+        'default' => FALSE,
+      ],
+      'require_usage' => [
+        'type' => 'boolean',
+        'title' => 'Require Usage',
+        'description' => 'Remind the agent if it tries to output without using this tool first.',
+        'default' => FALSE,
+      ],
+      'use_artifacts' => [
+        'type' => 'boolean',
+        'title' => 'Use Artifact Storage',
+        'description' => 'Store large responses in artifacts instead of sending to AI. Reference with {{artifact:tool_name:index}}',
+        'default' => FALSE,
+      ],
+      'description_override' => [
+        'type' => 'string',
+        'format' => 'textarea',
+        'title' => 'Override Tool Description',
+        'description' => 'Custom description sent to LLM instead of default. Leave empty to use default.',
+        'default' => '',
+      ],
+      'progress_message' => [
+        'type' => 'string',
+        'title' => 'Progress Message',
+        'description' => 'Message shown in UI while tool is executing.',
+        'default' => '',
       ],
     ];
+
+    // Add plugin-specific config if we can get it.
+    if (!empty($toolId)) {
+      $pluginConfig = $this->getToolPluginConfigSchema($toolId);
+      foreach ($pluginConfig as $key => $schema) {
+        $properties[$key] = $schema;
+      }
+    }
+
+    return [
+      'type' => 'object',
+      'properties' => $properties,
+      'required' => ['tool_id'],
+    ];
+  }
+
+  /**
+   * Gets config schema from a tool plugin if available.
+   */
+  protected function getToolPluginConfigSchema(string $toolId): array {
+    try {
+      $plugin = $this->functionCallPluginManager->createInstance($toolId);
+
+      // Check if plugin has configuration form.
+      if (!$plugin instanceof ConfigurableInterface && !$plugin instanceof PluginFormInterface) {
+        return [];
+      }
+
+      // Get default configuration.
+      $defaultConfig = [];
+      if ($plugin instanceof ConfigurableInterface) {
+        $defaultConfig = $plugin->defaultConfiguration();
+      }
+
+      // Build configuration form to extract field info.
+      if ($plugin instanceof PluginFormInterface) {
+        $formState = new FormState();
+        $form = $plugin->buildConfigurationForm([], $formState);
+
+        return $this->extractConfigSchemaFromForm($form, $defaultConfig);
+      }
+    }
+    catch (\Exception $e) {
+      // Return empty on error.
+    }
+
+    return [];
+  }
+
+  /**
+   * Extracts JSON Schema from a Drupal form array.
+   */
+  protected function extractConfigSchemaFromForm(array $form, array $defaultConfig): array {
+    $schema = [];
+
+    foreach ($form as $key => $element) {
+      // Skip non-element keys.
+      if (str_starts_with($key, '#')) {
+        continue;
+      }
+
+      if (!is_array($element) || !isset($element['#type'])) {
+        continue;
+      }
+
+      $fieldSchema = [
+        'title' => (string) ($element['#title'] ?? $key),
+      ];
+
+      if (!empty($element['#description'])) {
+        $fieldSchema['description'] = (string) $element['#description'];
+      }
+
+      // Map Drupal form type to JSON Schema type.
+      $type = $element['#type'];
+      switch ($type) {
+        case 'checkbox':
+          $fieldSchema['type'] = 'boolean';
+          break;
+
+        case 'number':
+          $fieldSchema['type'] = 'number';
+          break;
+
+        case 'select':
+          $fieldSchema['type'] = 'string';
+          if (!empty($element['#options'])) {
+            $fieldSchema['enum'] = array_keys($element['#options']);
+          }
+          break;
+
+        case 'textarea':
+          $fieldSchema['type'] = 'string';
+          $fieldSchema['format'] = 'textarea';
+          break;
+
+        default:
+          $fieldSchema['type'] = 'string';
+      }
+
+      // Set default from form or plugin config.
+      if (isset($element['#default_value'])) {
+        $fieldSchema['default'] = $element['#default_value'];
+      }
+      elseif (isset($defaultConfig[$key])) {
+        $fieldSchema['default'] = $defaultConfig[$key];
+      }
+
+      $schema[$key] = $fieldSchema;
+    }
+
+    return $schema;
+  }
+
+  /**
+   * Gets the tool settings schema including per-tool settings.
+   *
+   * This is used for the sidebar tool definitions.
+   */
+  protected function getToolSettingsSchema(string $toolId): array {
+    // Start with base tool settings that apply to all tools.
+    $schema = [
+      [
+        'config_id' => 'tool_id',
+        'name' => 'Tool ID',
+        'description' => 'The tool plugin ID (read-only)',
+        'value_type' => 'string',
+        'required' => TRUE,
+        'default' => $toolId,
+      ],
+      [
+        'config_id' => 'return_directly',
+        'name' => 'Return Directly',
+        'description' => 'Return tool result directly without LLM rewriting.',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'require_usage',
+        'name' => 'Require Usage',
+        'description' => 'Remind the agent if it tries to output without using this tool first.',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'use_artifacts',
+        'name' => 'Use Artifact Storage',
+        'description' => 'Store large responses in artifacts instead of sending to AI.',
+        'value_type' => 'boolean',
+        'default' => FALSE,
+      ],
+      [
+        'config_id' => 'description_override',
+        'name' => 'Override Tool Description',
+        'description' => 'Custom description sent to LLM instead of default.',
+        'value_type' => 'text',
+        'default' => '',
+      ],
+      [
+        'config_id' => 'progress_message',
+        'name' => 'Progress Message',
+        'description' => 'Message shown in UI while tool is executing.',
+        'value_type' => 'string',
+        'default' => '',
+      ],
+    ];
+
+    return $schema;
   }
 
   /**

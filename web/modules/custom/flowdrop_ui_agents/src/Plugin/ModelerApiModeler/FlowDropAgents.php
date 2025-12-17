@@ -89,8 +89,11 @@ class FlowDropAgents extends ModelerBase {
       $workflow = json_decode($data, TRUE) ?? [];
     }
 
-    // Get available tools for the sidebar.
-    $availableTools = $this->agentWorkflowMapper()->getAvailableTools($owner);
+    // Get available tools and agents for the sidebar.
+    $mapper = $this->agentWorkflowMapper();
+    $availableTools = $mapper->getAvailableTools($owner);
+    $availableAgents = $mapper->getAvailableAgents($owner);
+    $toolsByCategory = $mapper->getToolsByCategory($owner);
 
     $build = [
       '#type' => 'container',
@@ -113,6 +116,8 @@ class FlowDropAgents extends ModelerBase {
             'readOnly' => $readOnly,
             'workflow' => $workflow,
             'availableTools' => $availableTools,
+            'availableAgents' => $availableAgents,
+            'toolsByCategory' => $toolsByCategory,
             'modelOwner' => $owner->getPluginId(),
             'modeler' => 'flowdrop_agents',
           ],
@@ -128,10 +133,13 @@ class FlowDropAgents extends ModelerBase {
    */
   public function convert(ModelOwnerInterface $owner, ConfigEntityInterface $model, bool $readOnly = FALSE): array {
     // Convert AI Agent entity to FlowDrop workflow format.
-    $workflowData = $this->agentWorkflowMapper()->agentToWorkflow($model);
+    $mapper = $this->agentWorkflowMapper();
+    $workflowData = $mapper->agentToWorkflow($model);
 
-    // Get available tools for sidebar.
-    $availableTools = $this->agentWorkflowMapper()->getAvailableTools($owner);
+    // Get available tools and agents for sidebar.
+    $availableTools = $mapper->getAvailableTools($owner);
+    $availableAgents = $mapper->getAvailableAgents($owner);
+    $toolsByCategory = $mapper->getToolsByCategory($owner);
 
     $build = [
       '#type' => 'container',
@@ -154,6 +162,8 @@ class FlowDropAgents extends ModelerBase {
             'readOnly' => $readOnly,
             'workflow' => $workflowData,
             'availableTools' => $availableTools,
+            'availableAgents' => $availableAgents,
+            'toolsByCategory' => $toolsByCategory,
             'modelOwner' => $owner->getPluginId(),
             'modeler' => 'flowdrop_agents',
           ],

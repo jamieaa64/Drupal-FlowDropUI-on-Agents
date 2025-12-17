@@ -1,0 +1,54 @@
+# API Routes for FlowDrop Agents nodes (tools, agents, assistants)
+# These endpoints provide the sidebar data for the FlowDrop editor.
+
+flowdrop_ui_agents.api.nodes:
+  path: '/api/flowdrop-agents/nodes'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\NodesController::getNodes'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_ui_agents.api.nodes.by_category:
+  path: '/api/flowdrop-agents/nodes/by-category'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\NodesController::getNodesByCategory'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_ui_agents.api.nodes.category:
+  path: '/api/flowdrop-agents/nodes/{category}'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\NodesController::getNodesForCategory'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+flowdrop_ui_agents.api.nodes.metadata:
+  path: '/api/flowdrop-agents/nodes/{plugin_id}/metadata'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\NodesController::getNodeMetadata'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    parameters:
+      plugin_id:
+        type: string
+
+flowdrop_ui_agents.api.port_config:
+  path: '/api/flowdrop-agents/port-config'
+  defaults:
+    _controller: '\Drupal\flowdrop_ui_agents\Controller\Api\NodesController::getPortConfiguration'
+  requirements:
+    _permission: 'administer ai agents'
+  methods: [GET]
+  options:
+    no_cache: TRUE

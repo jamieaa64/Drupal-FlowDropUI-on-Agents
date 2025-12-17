@@ -4,170 +4,145 @@
 
 **IMPORTANT FOR FUTURE AGENTS**: This file documents the current branch's purpose, progress, and immediate next steps.
 
-- **Current Branch**: `main` (ready to commit Phase 6 completion)
-- **Phase**: 6 Complete, Ready for Phase 6.5
+- **Current Branch**: `main`
+- **Phase**: 6.5 Complete, Ready for Phase 7
 - **For historical context**: See `CLAUDE-NOTES.md` and `CLAUDE-PLANNING.md`
 
 ---
 
 ## Current Status (2024-12-17)
 
-### Phase 6 COMPLETE - Save is Working!
+### What's Working
+- FlowDrop visual editor loads for AI Agents
+- Sidebar shows ALL 108 tools + 5 agents (categorized)
+- Save functionality works via Modeler API
+- Tools use orange color, agents use purple
 
-Created `web/modules/custom/flowdrop_ui_agents/` with full Modeler API integration:
-
-| Component | File | Purpose |
-|-----------|------|---------|
-| Modeler Plugin | `FlowDropAgents.php` | Registers `flowdrop_agents` modeler |
-| Mapper Service | `AgentWorkflowMapper.php` | AI Agent ↔ FlowDrop conversion |
-| Parser Service | `WorkflowParser.php` | JSON → Modeler API Components |
-| JavaScript | `flowdrop-agents-editor.js` | Editor init & save handling |
-| CSS | `flowdrop-agents-editor.css` | Basic styling |
-
-**Test URL:** `/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
-
-### What Works Now
-
-- Load AI Agent into FlowDrop visual editor
-- Display agent node with connected tools
-- Edit agent properties (description, system prompt, etc.)
-- **SAVE changes back to AI Agent config entity**
-- Ctrl+S / Cmd+S keyboard shortcut
+### Test URL
+`/admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents`
 
 ---
 
-## Next Phase: 6.5 - Visual & UX Improvements
+## Known Issues (Next Phase)
 
-Before removing `flowdrop_ai_provider`, we need to port its better features:
+### Issue 1: Edge Lines Not Appearing on Load
+**Problem:** When loading an existing agent, the connecting lines between tools and agents don't render, even though edge data exists in the workflow.
 
-### Priority 1: Enhanced Sidebar
-Currently only shows 1 tool. Need to show ALL available tools like `flowdrop_ai_provider` does.
+**Impact:** User can't see which tools are connected to which agent.
 
-**Files to reference:**
-- `flowdrop_ai_provider/src/Services/ToolDataProvider.php` - `getAvailableTools()`
-- `flowdrop_ai_provider/src/Controller/Api/ToolsController.php` - API endpoints
+**Same issue existed in flowdrop_ai_provider** - this is likely a FlowDrop rendering or handle ID mismatch issue.
 
-### Priority 2: Visual Node Distinction
-Tools should look different from Agents:
-- **Agents**: Larger purple/blue boxes
-- **Tools**: Smaller orange boxes
+**To investigate:**
+1. Check browser console for edge-related errors
+2. Verify handle IDs match format: `${nodeId}-output-${portId}` / `${nodeId}-input-${portId}`
+3. Check if edges need to be added after initial render
+4. Compare with working FlowDrop workflow to find differences
 
-**Reference:** `FlowDropAgentMapper::toolsToToolNodes()` has the styling:
-```php
-'color' => 'var(--color-ref-orange-500)',
-'icon' => 'mdi:tools',
+### Issue 2: Multi-Agent/Sub-Agent Display
+**Problem:** When an agent uses another agent as a tool (orchestration/triage pattern), we only show the wrapper - not the sub-agent's own tools.
+
+**Example scenario:**
+```
+Bundle Lister Assistant
+  └── Agent Bundle Tool (ai_agents::ai_agent::agent_bundle_lister)
+        └── This is actually an agent with its OWN tools!
+            ├── list_bundles
+            ├── get_entity_type_info
+            └── etc.
 ```
 
-### Priority 3: Tool Config Schema
-Per-tool settings that should be editable:
-- `return_directly` - Return tool result without LLM rewriting
-- `require_usage` - Agent must use this tool
-- `use_artifacts` - Store large responses
-- `description_override` - Custom tool description
-- `progress_message` - UI feedback during execution
+**Current behavior:** Shows "Agent Bundle Tool" as a single tool node
+**Expected behavior:** Should show sub-agent's structure or indicate it's an agent with nested tools
 
-### Priority 4: Remove flowdrop_ai_provider
-After features ported:
-```bash
-ddev drush pmu flowdrop_ai_provider
-# Remove from composer.json if needed
-```
+**Possible solutions:**
+1. **Recursive expansion** - When tool ID starts with `ai_agents::ai_agent::`, expand to show its tools
+2. **Visual indicator** - Different icon/badge for "agent-as-tool" vs regular tools
+3. **Drill-down view** - Click to open sub-agent in nested view
+4. **Grouped nodes** - Show sub-agent as a group containing its tools
 
 ---
 
-## Files Created in Phase 6
+## Phase 7: Edge Rendering & Multi-Agent
+
+### Priority 1: Fix Edge Rendering
+1. Debug why edges don't appear on load
+2. Check handle ID generation in `AgentWorkflowMapper::createToolNode()`
+3. Verify edge data structure matches FlowDrop expectations
+4. Test with manually created edges in console
+
+### Priority 2: Multi-Agent Visual Representation
+1. Detect when a tool is actually an agent (`ai_agents::ai_agent::*`)
+2. Decide on UX approach (expand, badge, or drill-down)
+3. Update `agentToWorkflow()` to handle nested agents
+4. Consider recursive depth limits
+
+### Priority 3: Cleanup
+1. Remove `flowdrop_ai_provider` module if no longer needed
+2. Export any new config
+3. Update documentation
+
+---
+
+## Module Structure
 
 ```
 web/modules/custom/flowdrop_ui_agents/
 ├── flowdrop_ui_agents.info.yml
 ├── flowdrop_ui_agents.services.yml
 ├── flowdrop_ui_agents.libraries.yml
+├── flowdrop_ui_agents.routing.yml
 ├── src/
+│   ├── Controller/Api/
+│   │   └── NodesController.php       # Sidebar API (108 tools)
 │   ├── Plugin/ModelerApiModeler/
-│   │   └── FlowDropAgents.php
+│   │   └── FlowDropAgents.php        # Modeler plugin
 │   └── Service/
-│       ├── AgentWorkflowMapper.php
-│       └── WorkflowParser.php
+│       ├── AgentWorkflowMapper.php   # AI Agent ↔ FlowDrop
+│       └── WorkflowParser.php        # JSON → Components
 ├── js/
 │   └── flowdrop-agents-editor.js
-├── css/
-│   └── flowdrop-agents-editor.css
-└── patches/
-    └── README.md
+└── css/
+    └── flowdrop-agents-editor.css
 ```
 
 ---
 
-## How the System Works
+## Key Technical Details
 
-### Architecture
+### API Endpoints
+- `GET /api/flowdrop-agents/nodes` - All tools + agents
+- `GET /api/flowdrop-agents/nodes/by-category` - Grouped
+- `GET /api/flowdrop-agents/nodes/{id}/metadata` - Single node
+
+### Handle ID Format (for edges)
 ```
-┌─────────────────┐      ┌─────────────────────┐      ┌──────────────────┐
-│   AI Agent      │ ←──→ │  flowdrop_agents    │ ←──→ │   FlowDrop UI    │
-│   Config Entity │      │  (Modeler Plugin)   │      │   (Visual Editor)│
-└─────────────────┘      └─────────────────────┘      └──────────────────┘
-        │                          │                           │
-   ai_agents_agent           AgentWorkflowMapper          flowdrop_ui
-   (ModelOwner)              WorkflowParser               (JS Library)
-```
-
-### Load Flow
-1. User visits `/admin/config/ai/agents/{id}/edit_with/flowdrop_agents`
-2. `FlowDropAgents::convert()` → `AgentWorkflowMapper::agentToWorkflow()`
-3. Returns workflow JSON with nodes, edges, metadata
-4. FlowDrop UI renders the visual editor
-
-### Save Flow
-1. User clicks "Save AI Agent" or Ctrl+S
-2. JavaScript calls `app.getWorkflow()` to get current state
-3. POST to `/admin/modeler_api/ai_agent/flowdrop_agents/save`
-4. `FlowDropAgents::parseData()` → `WorkflowParser::toComponents()`
-5. Returns `Component[]` objects
-6. `Agent::addComponent()` updates AI Agent entity
-
----
-
-## Key Technical Notes
-
-### Component Types (from modeler_api/Api.php)
-```php
-COMPONENT_TYPE_START = 1    // Agent node
-COMPONENT_TYPE_ELEMENT = 4  // Tool node
-COMPONENT_TYPE_LINK = 5     // Edge/connection
+Input:  ${nodeId}-input-${portId}
+Output: ${nodeId}-output-${portId}
 ```
 
-### Agent Config Keys (must match AiAgentForm)
-```php
-'agent_id', 'label', 'description', 'system_prompt',
-'max_loops', 'orchestration_agent', 'triage_agent',
-'secured_system_prompt', 'default_information_tools',
-'structured_output_enabled', 'structured_output_schema'
-```
-
-### JavaScript Timing Issue (FIXED)
-Must use `editorContainer.flowdropApp` NOT `window.currentFlowDropApp` because the navbar onclick handler captures scope before the global is set.
+### Tool ID Formats
+- Regular tools: `ai_agent:tool_name` or `tool:tool_name`
+- Agent-as-tool: `ai_agents::ai_agent::agent_id` (double colons)
 
 ---
 
 ## For Next Agent
 
 ```
-Continue with Phase 6.5 - Visual & UX Improvements
+Continue with Phase 7 - Edge Rendering & Multi-Agent
 
-CURRENT STATE: Phase 6 complete, save working!
-MODULE: web/modules/custom/flowdrop_ui_agents/
+ISSUE 1: Edge lines don't appear when loading agents
+- Check handle ID format in AgentWorkflowMapper
+- Debug in browser console
+- Compare with working FlowDrop workflows
 
-NEXT TASKS:
-1. Port ToolDataProvider to show all tools in sidebar
-2. Add visual distinction between tool and agent nodes
-3. Add per-tool config settings
-4. Then remove flowdrop_ai_provider module
-
-REFERENCE CODE:
-- flowdrop_ai_provider/src/Services/ToolDataProvider.php
-- flowdrop_ai_provider/src/Services/FlowDropAgentMapper.php
+ISSUE 2: Sub-agents not shown with their tools
+- Detect ai_agents::ai_agent::* tool IDs
+- Decide on visual approach
+- Update agentToWorkflow() for nested structure
 
 TEST URL: /admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents
+MODULE: web/modules/custom/flowdrop_ui_agents/
 ```
 
 ---
@@ -176,6 +151,6 @@ TEST URL: /admin/config/ai/agents/agent_bundle_lister/edit_with/flowdrop_agents
 
 | File | Purpose |
 |------|---------|
-| `CLAUDE-NOTES.md` | Historical findings, technical details |
-| `CLAUDE-PLANNING.md` | Full implementation plan, all phases |
-| `CLAUDE.md` | General project guidance, DDEV commands |
+| `CLAUDE-NOTES.md` | Technical findings, issue details |
+| `CLAUDE-PLANNING.md` | Full implementation plan |
+| `CLAUDE.md` | Project guidance, DDEV commands |
