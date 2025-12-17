@@ -1,0 +1,19 @@
+uuid: 7e327c86-acfc-4965-a11d-1b46cc1e1512
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_type_of_food
+    - node.type.foodstuff
+id: node.foodstuff.field_type_of_food
+field_name: field_type_of_food
+entity_type: node
+bundle: foodstuff
+label: 'Type of food'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
