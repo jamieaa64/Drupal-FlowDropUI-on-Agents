@@ -1,0 +1,12 @@
+uuid: 8dc4a6d1-6156-4648-b05a-a05d7358ae1d
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: a9ZyEXXcH8mJMoiaZIgmNmPMo4zXmJxIZNKvSTqpedE
+id: processing
+label: Processing
+description: 'Node types that process and transform data'
+icon: 'mdi:cog'
+color: '#2196F3'
+enabled: true

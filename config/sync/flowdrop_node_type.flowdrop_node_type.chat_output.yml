@@ -1,0 +1,23 @@
+uuid: 290ce98b-9069-4931-b239-65086afaa474
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: zgM3ghaxWeD5uAKNHpAQYA4TJDyUaRCH3e1nlYSxdT8
+id: chat_output
+label: 'Chat Output'
+description: 'Display chat-style output with formatting'
+category: output
+icon: 'mdi:chat'
+color: '#8b5cf6'
+version: 1.0.0
+enabled: true
+config:
+  showTimestamp: true
+  maxLength: 2000
+  markdown: true
+tags:
+  - output
+  - chat
+  - display
+executor_plugin: chat_output

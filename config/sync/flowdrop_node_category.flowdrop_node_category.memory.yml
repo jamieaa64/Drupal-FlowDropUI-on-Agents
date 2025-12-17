@@ -1,0 +1,12 @@
+uuid: 002b0970-3c37-4fa1-8061-290c37d05621
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ImjZMTVSTOeb0GFOEhhRiiHWmwiipDnv1UIxfY-2-GI
+id: memory
+label: Memory
+description: 'Node types for conversation memory and context management'
+icon: 'mdi:brain'
+color: '#ec4899'
+enabled: true

@@ -1,0 +1,12 @@
+uuid: 775af6ef-5746-46b8-bfb2-9b0d4fd2a90f
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: uCeo3STmWd-8QkiLdygdZci2_9Us3VFtHgbz1kQLyr4
+id: embedding
+label: Embedding
+description: 'Node types for text embedding and vector operations'
+icon: 'mdi:vector-point'
+color: '#8b5cf6'
+enabled: true

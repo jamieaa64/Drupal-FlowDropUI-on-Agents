@@ -1,0 +1,25 @@
+uuid: 83161509-58ba-4c4d-808b-02334d3ba9cb
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 8SXfd3n51kKwpbh2J4f05BW7gSL94DjBk4nVWtTN8GA
+id: chat_model
+label: 'Chat Model'
+description: 'AI chat model for conversation and text generation'
+category: model
+icon: 'mdi:robot'
+color: '#8b5cf6'
+version: 1.0.0
+enabled: true
+config:
+  model: ''
+  temperature: 0.7
+  maxTokens: 1000
+  systemPrompt: ''
+tags:
+  - model
+  - ai
+  - chat
+  - gpt
+executor_plugin: chat_model

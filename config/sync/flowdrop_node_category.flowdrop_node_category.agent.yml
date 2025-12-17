@@ -1,0 +1,12 @@
+uuid: 11ef922d-aeb6-4f71-8d00-844cd7099114
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: kwAZrRjrWtSzzsRQY1_j_fric2EMVa-yoPKWNQLRHYY
+id: agent
+label: Agent
+description: 'Node types for AI agents and autonomous systems'
+icon: 'mdi:account-cog'
+color: '#06b6d4'
+enabled: true

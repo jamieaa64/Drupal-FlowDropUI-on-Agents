@@ -1,0 +1,12 @@
+uuid: 0358d1d4-adfe-45c8-a679-f64683eb5e27
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: Zy1g1ys-a3SG47-6wv8Y1rtlNwGfGb6H2D9d5hIiTMQ
+id: input
+label: Input
+description: 'Node types that provide input data to workflows'
+icon: 'mdi:input'
+color: '#4CAF50'
+enabled: true
